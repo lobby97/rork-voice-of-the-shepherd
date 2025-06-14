@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { QuoteCard } from '@/components/QuoteCard';
 import { StreakProgress } from '@/components/StreakProgress';
+import { ConfessionTracker } from '@/components/ConfessionTracker';
 import { CongratulationsModal } from '@/components/CongratulationsModal';
 import { quotes } from '@/mocks/quotes';
 import { usePlayerStore } from '@/store/playerStore';
@@ -133,6 +134,9 @@ export default function HomeScreen() {
         
         {/* Streak Progress */}
         <StreakProgress />
+        
+        {/* Confession Tracker */}
+        <ConfessionTracker />
         
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Featured Teachings</Text>

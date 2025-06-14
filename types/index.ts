@@ -30,3 +30,28 @@ export interface StreakData {
   lastCompletedDate: string | null;
   todayProgress: DailyProgress;
 }
+
+export interface SpiritualGoal {
+  id: string;
+  sin: string;
+  virtue: string;
+  description: string;
+  progress: number; // 0-100
+  dateAdded: string;
+  isActive: boolean;
+}
+
+export interface ConfessionData {
+  lastConfessionDate: string | null;
+  spiritualGoals: SpiritualGoal[];
+  confessionReminder: boolean;
+  reminderDays: number; // days between confession reminders
+}
+
+export interface CommonSin {
+  id: string;
+  sin: string;
+  virtue: string;
+  description: string;
+  category: 'pride' | 'greed' | 'lust' | 'envy' | 'gluttony' | 'wrath' | 'sloth';
+}
