@@ -53,7 +53,7 @@ export const MiniPlayer: React.FC = () => {
   const showPlaylistControls = currentPlaylist.length > 1;
   
   return (
-    <View style={[styles.container, { bottom: tabBarHeight + 8 }]}>
+    <View style={[styles.container, { bottom: tabBarHeight + 12 }]}>
       <TouchableOpacity
         style={[
           styles.playerContainer, 
@@ -63,7 +63,7 @@ export const MiniPlayer: React.FC = () => {
           }
         ]}
         onPress={handlePress}
-        activeOpacity={0.9}
+        activeOpacity={0.95}
       >
         <Image
           source={{ uri: currentQuote.imageUrl }}
@@ -85,30 +85,30 @@ export const MiniPlayer: React.FC = () => {
         <View style={styles.controls}>
           {showPlaylistControls && (
             <TouchableOpacity
-              style={styles.controlButton}
+              style={[styles.controlButton, { backgroundColor: theme.muted }]}
               onPress={handlePrevious}
             >
-              <SkipBack size={16} color={theme.primary} />
+              <SkipBack size={16} color={theme.text} />
             </TouchableOpacity>
           )}
           
           <TouchableOpacity
-            style={styles.playButton}
+            style={[styles.playButton, { backgroundColor: theme.primary }]}
             onPress={handlePlayPause}
           >
             {isPlaying ? (
-              <Pause size={18} color={theme.primary} />
+              <Pause size={18} color="#FFFFFF" />
             ) : (
-              <Play size={18} color={theme.primary} />
+              <Play size={18} color="#FFFFFF" fill="#FFFFFF" />
             )}
           </TouchableOpacity>
           
           {showPlaylistControls && (
             <TouchableOpacity
-              style={styles.controlButton}
+              style={[styles.controlButton, { backgroundColor: theme.muted }]}
               onPress={handleNext}
             >
-              <SkipForward size={16} color={theme.primary} />
+              <SkipForward size={16} color={theme.text} />
             </TouchableOpacity>
           )}
         </View>
@@ -122,60 +122,60 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 12,
-    right: 12,
+    left: 16,
+    right: 16,
     zIndex: 500,
   },
   playerContainer: {
-    height: 64,
+    height: 72,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 0.5,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   image: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
   },
   content: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 16,
   },
   text: {
-    fontSize: typography.sizes.sm,
-    fontFamily: typography.quoteFont,
-    marginBottom: 2,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
+    marginBottom: 4,
+    fontFamily: typography.fonts.quote,
   },
   category: {
-    fontSize: typography.sizes.xs,
-    fontWeight: '500',
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
   },
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: 12,
+    gap: 8,
   },
   playButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  controlButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 4,
-  },
-  controlButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 2,
   },
 });

@@ -1,320 +1,301 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
-import { useConfessionStore, commonSins } from '@/store/confessionStore';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, ScrollView, TextInput, Alert } from 'react-native';
+import { useConfessionStore } from '@/store/confessionStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { colors } from '@/constants/colors';
 import { typography } from '@/constants/typography';
-import { Heart, Plus, Calendar, Target, CheckCircle, X, Trash2, Edit3 } from 'lucide-react-native';
+import { Calendar, Plus, Target, X, Check, Heart, Shield } from 'lucide-react-native';
 
 export const ConfessionTracker: React.FC = () => {
-  const { isDarkMode } = useSettingsStore();
-  const {
-    lastConfessionDate,
-    spiritualGoals,
-    setLastConfessionDate,
-    addSpiritualGoal,
-    removeSpiritualGoal,
-    updateGoalProgress,
-    toggleGoalActive,
-    getDaysSinceLastConfession,
-    shouldShowConfessionReminder
+  const { 
+    lastConfessionDate, 
+    spiritualGoals, 
+    addSpiritualGoal, 
+    toggleGoalCompleted, 
+    updateLastConfessionDate,
+    removeSpiritualGoal 
   } = useConfessionStore();
-  
-  const [showAddGoalModal, setShowAddGoalModal] = useState(false);
-  const [showCommonSinsModal, setShowCommonSinsModal] = useState(false);
-  const [customSin, setCustomSin] = useState('');
-  const [customVirtue, setCustomVirtue] = useState('');
-  const [customDescription, setCustomDescription] = useState('');
+  const { isDarkMode } = useSettingsStore();
+  const [showModal, setShowModal] = useState(false);
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [newGoal, setNewGoal] = useState('');
   
   const theme = isDarkMode ? colors.dark : colors.light;
   
-  const daysSinceConfession = getDaysSinceLastConfession();
-  const activeGoals = spiritualGoals.filter(goal => goal.isActive);
-  const showReminder = shouldShowConfessionReminder();
+  const daysSinceConfession = lastConfessionDate 
+    ? Math.floor((Date.now() - lastConfessionDate.getTime()) / (1000 * 60 * 60 * 24))
+    : null;
   
-  const handleSetConfessionDate = () => {
-    const today = new Date().toISOString().split('T')[0];
+  const completedGoals = spiritualGoals.filter(goal => goal.completed).length;
+  const totalGoals = spiritualGoals.length;
+  
+  const commonSins = [
+    { sin: 'Pride', virtue: 'Humility', description: 'Practice putting others first and acknowledging God\'s grace' },
+    { sin: 'Anger', virtue: 'Patience', description: 'Respond with love and understanding instead of anger' },
+    { sin: 'Envy', virtue: 'Gratitude', description: 'Focus on your blessings and celebrate others\' success' },
+    { sin: 'Laziness', virtue: 'Diligence', description: 'Be faithful in small things and serve others actively' },
+    { sin: 'Greed', virtue: 'Generosity', description: 'Share your resources and trust in God\'s provision' },
+    { sin: 'Gossip', virtue: 'Kindness', description: 'Speak words that build up and encourage others' },
+    { sin: 'Impatience', virtue: 'Peace', description: 'Trust in God\'s timing and remain calm in trials' },
+    { sin: 'Selfishness', virtue: 'Love', description: 'Seek to serve others as Christ served us' },
+  ];
+  
+  const handleUpdateConfession = () => {
+    updateLastConfessionDate(new Date());
     Alert.alert(
-      'Record Confession',
-      'Mark today as your last confession date?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Confirm', 
-          onPress: () => {
-            setLastConfessionDate(today);
-            Alert.alert('Recorded', 'Your confession date has been recorded. May God bless your spiritual journey.');
-          }
-        }
-      ]
+      'Confession Updated',
+      'May God\'s peace be with you. Your spiritual journey continues.',
+      [{ text: 'Amen', style: 'default' }]
     );
   };
   
-  const handleAddCustomGoal = () => {
-    if (!customSin.trim() || !customVirtue.trim()) {
-      Alert.alert('Missing Information', 'Please enter both a sin to overcome and its corresponding virtue.');
-      return;
+  const handleAddGoal = (sinData?: { sin: string; virtue: string; description: string }) => {
+    if (sinData) {
+      const goalText = `Overcome ${sinData.sin} through ${sinData.virtue}: ${sinData.description}`;
+      addSpiritualGoal(goalText);
+    } else if (newGoal.trim()) {
+      addSpiritualGoal(newGoal.trim());
+      setNewGoal('');
     }
-    
-    addSpiritualGoal(customSin.trim(), customVirtue.trim(), customDescription.trim());
-    setCustomSin('');
-    setCustomVirtue('');
-    setCustomDescription('');
-    setShowAddGoalModal(false);
-  };
-  
-  const handleAddCommonSin = (sin: typeof commonSins[0]) => {
-    addSpiritualGoal(sin.sin, sin.virtue, sin.description);
-    setShowCommonSinsModal(false);
-  };
-  
-  const handleProgressUpdate = (goalId: string, currentProgress: number) => {
-    Alert.alert(
-      'Update Progress',
-      'How is your progress with this spiritual goal?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Struggling (25%)', onPress: () => updateGoalProgress(goalId, 25) },
-        { text: 'Making Progress (50%)', onPress: () => updateGoalProgress(goalId, 50) },
-        { text: 'Good Progress (75%)', onPress: () => updateGoalProgress(goalId, 75) },
-        { text: 'Excellent (100%)', onPress: () => updateGoalProgress(goalId, 100) },
-      ]
-    );
+    setShowGoalModal(false);
   };
   
   const getConfessionMessage = () => {
-    if (!lastConfessionDate) {
-      return "Begin your spiritual journey by recording your first confession";
-    }
-    
-    if (daysSinceConfession === 0) {
-      return "You confessed today. Peace be with you 🙏";
-    } else if (daysSinceConfession === 1) {
-      return "You confessed yesterday. Continue your spiritual growth";
-    } else if (daysSinceConfession! <= 7) {
-      return `${daysSinceConfession} days since confession. Keep growing in virtue`;
-    } else if (daysSinceConfession! <= 30) {
-      return `${daysSinceConfession} days since confession. Consider scheduling another soon`;
+    if (!daysSinceConfession) {
+      return "Begin your journey of reconciliation with God";
+    } else if (daysSinceConfession === 0) {
+      return "Blessed are those who seek forgiveness - you confessed today";
+    } else if (daysSinceConfession <= 7) {
+      return `${daysSinceConfession} days since confession - walking in grace`;
+    } else if (daysSinceConfession <= 30) {
+      return `${daysSinceConfession} days since confession - consider returning to the sacrament`;
     } else {
-      return `${daysSinceConfession} days since confession. Your soul thirsts for reconciliation`;
+      return `${daysSinceConfession} days since confession - God awaits your return with open arms`;
     }
   };
   
   return (
     <>
-      <View style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]}>
+      <TouchableOpacity
+        style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]}
+        onPress={() => setShowModal(true)}
+        activeOpacity={0.8}
+      >
         <View style={styles.header}>
           <View style={styles.titleContainer}>
-            <Heart size={20} color="#8B5CF6" />
-            <Text style={[styles.title, { color: theme.text }]}>Confession Tracker</Text>
-          </View>
-          
-          {showReminder && (
-            <View style={styles.reminderBadge}>
-              <Text style={styles.reminderText}>!</Text>
+            <View style={[styles.iconContainer, { backgroundColor: theme.accent + '20' }]}>
+              <Shield size={20} color={theme.accent} />
             </View>
-          )}
-        </View>
-        
-        <View style={styles.confessionSection}>
-          <View style={styles.confessionHeader}>
-            <Calendar size={16} color={theme.primary} />
-            <Text style={[styles.confessionLabel, { color: theme.text }]}>
-              Last Confession
-            </Text>
-            <TouchableOpacity
-              style={[styles.recordButton, { backgroundColor: theme.primary }]}
-              onPress={handleSetConfessionDate}
-            >
-              <Text style={styles.recordButtonText}>Record Today</Text>
-            </TouchableOpacity>
+            <View>
+              <Text style={[styles.title, { color: theme.text }]}>Confession & Growth</Text>
+              <Text style={[styles.subtitle, { color: theme.secondary }]}>
+                Track your spiritual journey
+              </Text>
+            </View>
           </View>
           
-          <Text style={[styles.confessionMessage, { color: theme.secondary }]}>
-            {getConfessionMessage()}
-          </Text>
+          <View style={[styles.daysContainer, { backgroundColor: theme.primary + '20' }]}>
+            <Calendar size={16} color={theme.primary} />
+            <Text style={[styles.daysText, { color: theme.text }]}>
+              {daysSinceConfession ?? '—'}
+            </Text>
+          </View>
         </View>
         
-        <View style={styles.goalsSection}>
-          <View style={styles.goalsHeader}>
-            <View style={styles.goalsTitle}>
-              <Target size={16} color={theme.primary} />
-              <Text style={[styles.goalsLabel, { color: theme.text }]}>
-                Spiritual Goals ({activeGoals.length})
+        <Text style={[styles.confessionMessage, { color: theme.secondary }]}>
+          {getConfessionMessage()}
+        </Text>
+        
+        {totalGoals > 0 && (
+          <View style={styles.goalsSection}>
+            <View style={styles.goalsHeader}>
+              <Text style={[styles.goalsTitle, { color: theme.text }]}>Spiritual Goals</Text>
+              <Text style={[styles.goalsProgress, { color: theme.primary }]}>
+                {completedGoals}/{totalGoals}
               </Text>
             </View>
             
-            <View style={styles.addButtons}>
-              <TouchableOpacity
-                style={[styles.addButton, { backgroundColor: theme.muted }]}
-                onPress={() => setShowCommonSinsModal(true)}
-              >
-                <Text style={[styles.addButtonText, { color: theme.text }]}>Common</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.addButton, { backgroundColor: theme.primary }]}
-                onPress={() => setShowAddGoalModal(true)}
-              >
-                <Plus size={16} color="#FFFFFF" />
-              </TouchableOpacity>
+            <View style={[styles.progressBar, { backgroundColor: theme.border }]}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { 
+                    backgroundColor: theme.success,
+                    width: totalGoals > 0 ? `${(completedGoals / totalGoals) * 100}%` : '0%'
+                  }
+                ]} 
+              />
             </View>
+          </View>
+        )}
+      </TouchableOpacity>
+      
+      {/* Main Modal */}
+      <Modal
+        visible={showModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={[styles.modalContainer, { backgroundColor: theme.background }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Confession & Spiritual Growth</Text>
+            <TouchableOpacity onPress={() => setShowModal(false)}>
+              <X size={24} color={theme.text} />
+            </TouchableOpacity>
           </View>
           
-          {activeGoals.length === 0 ? (
-            <Text style={[styles.emptyText, { color: theme.secondary }]}>
-              Add spiritual goals to track your growth in virtue
-            </Text>
-          ) : (
-            <ScrollView style={styles.goalsList} showsVerticalScrollIndicator={false}>
-              {activeGoals.slice(0, 3).map(goal => (
-                <TouchableOpacity
-                  key={goal.id}
-                  style={[styles.goalItem, { backgroundColor: theme.muted }]}
-                  onPress={() => handleProgressUpdate(goal.id, goal.progress)}
-                >
-                  <View style={styles.goalContent}>
-                    <View style={styles.goalInfo}>
-                      <Text style={[styles.goalSin, { color: theme.text }]}>{goal.sin}</Text>
-                      <Text style={[styles.goalVirtue, { color: theme.primary }]}>→ {goal.virtue}</Text>
-                    </View>
-                    
-                    <View style={styles.goalProgress}>
-                      <View style={[styles.progressBar, { backgroundColor: theme.border }]}>
-                        <View 
-                          style={[
-                            styles.progressFill, 
-                            { 
-                              backgroundColor: goal.progress >= 75 ? '#4CAF50' : theme.primary,
-                              width: `${goal.progress}%` 
-                            }
-                          ]} 
-                        />
-                      </View>
-                      <Text style={[styles.progressText, { color: theme.secondary }]}>
-                        {goal.progress}%
-                      </Text>
-                    </View>
-                  </View>
-                  
-                  <TouchableOpacity
-                    style={styles.goalAction}
-                    onPress={() => removeSpiritualGoal(goal.id)}
-                  >
-                    <X size={16} color={theme.secondary} />
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              ))}
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            {/* Confession Section */}
+            <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={styles.sectionHeader}>
+                <Shield size={24} color={theme.accent} />
+                <Text style={[styles.sectionTitle, { color: theme.text }]}>Last Confession</Text>
+              </View>
               
-              {activeGoals.length > 3 && (
-                <Text style={[styles.moreGoalsText, { color: theme.secondary }]}>
-                  +{activeGoals.length - 3} more goals
+              <Text style={[styles.confessionDate, { color: theme.secondary }]}>
+                {lastConfessionDate 
+                  ? `${lastConfessionDate.toLocaleDateString()} (${daysSinceConfession} days ago)`
+                  : 'Not recorded yet'
+                }
+              </Text>
+              
+              <Text style={[styles.confessionMessage, { color: theme.secondary }]}>
+                {getConfessionMessage()}
+              </Text>
+              
+              <TouchableOpacity
+                style={[styles.updateButton, { backgroundColor: theme.accent }]}
+                onPress={handleUpdateConfession}
+              >
+                <Calendar size={20} color="#FFFFFF" />
+                <Text style={styles.updateButtonText}>Update Confession Date</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {/* Spiritual Goals Section */}
+            <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={styles.sectionHeader}>
+                <Target size={24} color={theme.primary} />
+                <Text style={[styles.sectionTitle, { color: theme.text }]}>Spiritual Goals</Text>
+                <TouchableOpacity
+                  style={[styles.addButton, { backgroundColor: theme.primary }]}
+                  onPress={() => setShowGoalModal(true)}
+                >
+                  <Plus size={16} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+              
+              {spiritualGoals.length === 0 ? (
+                <Text style={[styles.emptyText, { color: theme.secondary }]}>
+                  No spiritual goals yet. Add some to track your growth in virtue.
                 </Text>
+              ) : (
+                spiritualGoals.map(goal => (
+                  <View key={goal.id} style={[styles.goalItem, { borderColor: theme.border }]}>
+                    <TouchableOpacity
+                      style={[styles.goalCheckbox, { 
+                        backgroundColor: goal.completed ? theme.success : 'transparent',
+                        borderColor: goal.completed ? theme.success : theme.border
+                      }]}
+                      onPress={() => toggleGoalCompleted(goal.id)}
+                    >
+                      {goal.completed && <Check size={16} color="#FFFFFF" />}
+                    </TouchableOpacity>
+                    
+                    <Text style={[
+                      styles.goalText, 
+                      { 
+                        color: goal.completed ? theme.secondary : theme.text,
+                        textDecorationLine: goal.completed ? 'line-through' : 'none'
+                      }
+                    ]}>
+                      {goal.text}
+                    </Text>
+                    
+                    <TouchableOpacity
+                      style={styles.removeButton}
+                      onPress={() => removeSpiritualGoal(goal.id)}
+                    >
+                      <X size={16} color={theme.error} />
+                    </TouchableOpacity>
+                  </View>
+                ))
               )}
-            </ScrollView>
-          )}
-        </View>
-      </View>
-      
-      {/* Add Custom Goal Modal */}
-      <Modal
-        visible={showAddGoalModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowAddGoalModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Add Spiritual Goal</Text>
-            
-            <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: theme.text }]}>Sin to Overcome</Text>
-              <TextInput
-                style={[styles.textInput, { backgroundColor: theme.muted, color: theme.text }]}
-                value={customSin}
-                onChangeText={setCustomSin}
-                placeholder="e.g., Pride, Anger, Laziness"
-                placeholderTextColor={theme.secondary}
-              />
             </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: theme.text }]}>Virtue to Develop</Text>
-              <TextInput
-                style={[styles.textInput, { backgroundColor: theme.muted, color: theme.text }]}
-                value={customVirtue}
-                onChangeText={setCustomVirtue}
-                placeholder="e.g., Humility, Patience, Diligence"
-                placeholderTextColor={theme.secondary}
-              />
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: theme.text }]}>Description (Optional)</Text>
-              <TextInput
-                style={[styles.textInput, { backgroundColor: theme.muted, color: theme.text }]}
-                value={customDescription}
-                onChangeText={setCustomDescription}
-                placeholder="How will you practice this virtue?"
-                placeholderTextColor={theme.secondary}
-                multiline
-                numberOfLines={2}
-              />
-            </View>
-            
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: theme.muted }]}
-                onPress={() => setShowAddGoalModal(false)}
-              >
-                <Text style={[styles.modalButtonText, { color: theme.text }]}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: theme.primary }]}
-                onPress={handleAddCustomGoal}
-              >
-                <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>Add Goal</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
       
-      {/* Common Sins Modal */}
+      {/* Add Goal Modal */}
       <Modal
-        visible={showCommonSinsModal}
-        transparent
+        visible={showGoalModal}
         animationType="slide"
-        onRequestClose={() => setShowCommonSinsModal(false)}
+        presentationStyle="pageSheet"
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Common Sins & Virtues</Text>
-            
-            <ScrollView style={styles.commonSinsList} showsVerticalScrollIndicator={false}>
-              {commonSins.map(sin => (
-                <TouchableOpacity
-                  key={sin.id}
-                  style={[styles.commonSinItem, { backgroundColor: theme.muted }]}
-                  onPress={() => handleAddCommonSin(sin)}
-                >
-                  <View style={styles.commonSinContent}>
-                    <Text style={[styles.commonSinName, { color: theme.text }]}>{sin.sin}</Text>
-                    <Text style={[styles.commonSinVirtue, { color: theme.primary }]}>→ {sin.virtue}</Text>
-                    <Text style={[styles.commonSinDescription, { color: theme.secondary }]}>
-                      {sin.description}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: theme.muted, marginTop: 16 }]}
-              onPress={() => setShowCommonSinsModal(false)}
-            >
-              <Text style={[styles.modalButtonText, { color: theme.text }]}>Close</Text>
+        <View style={[styles.modalContainer, { backgroundColor: theme.background }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Add Spiritual Goal</Text>
+            <TouchableOpacity onPress={() => setShowGoalModal(false)}>
+              <X size={24} color={theme.text} />
             </TouchableOpacity>
           </View>
+          
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            {/* Common Sins & Virtues */}
+            <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>Common Areas for Growth</Text>
+              <Text style={[styles.sectionSubtitle, { color: theme.secondary }]}>
+                Choose a virtue to overcome a particular struggle
+              </Text>
+              
+              {commonSins.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[styles.sinItem, { borderColor: theme.border }]}
+                  onPress={() => handleAddGoal(item)}
+                >
+                  <View style={styles.sinHeader}>
+                    <Text style={[styles.sinText, { color: theme.error }]}>{item.sin}</Text>
+                    <Text style={[styles.arrowText, { color: theme.secondary }]}>→</Text>
+                    <Text style={[styles.virtueText, { color: theme.success }]}>{item.virtue}</Text>
+                  </View>
+                  <Text style={[styles.sinDescription, { color: theme.secondary }]}>
+                    {item.description}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            
+            {/* Custom Goal */}
+            <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>Custom Goal</Text>
+              
+              <TextInput
+                style={[styles.textInput, { 
+                  backgroundColor: theme.background, 
+                  borderColor: theme.border,
+                  color: theme.text
+                }]}
+                placeholder="Enter your spiritual goal..."
+                placeholderTextColor={theme.secondary}
+                value={newGoal}
+                onChangeText={setNewGoal}
+                multiline
+                numberOfLines={3}
+              />
+              
+              <TouchableOpacity
+                style={[styles.addGoalButton, { 
+                  backgroundColor: newGoal.trim() ? theme.primary : theme.muted 
+                }]}
+                onPress={() => handleAddGoal()}
+                disabled={!newGoal.trim()}
+              >
+                <Plus size={20} color="#FFFFFF" />
+                <Text style={styles.addGoalButtonText}>Add Custom Goal</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
       </Modal>
     </>
@@ -323,240 +304,238 @@ export const ConfessionTracker: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 16,
+    marginHorizontal: 20,
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 12,
+    elevation: 6,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  title: {
-    fontSize: typography.sizes.md,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  reminderBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#FF6B35',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reminderText: {
-    color: '#FFFFFF',
-    fontSize: typography.sizes.xs,
-    fontWeight: '700',
-  },
-  confessionSection: {
-    marginBottom: 16,
-  },
-  confessionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  confessionLabel: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '500',
-    marginLeft: 8,
     flex: 1,
   },
-  recordButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
-  recordButtonText: {
-    color: '#FFFFFF',
-    fontSize: typography.sizes.xs,
-    fontWeight: '600',
+  title: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    marginBottom: 2,
+  },
+  subtitle: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  },
+  daysContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  daysText: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.bold,
+    marginLeft: 6,
   },
   confessionMessage: {
     fontSize: typography.sizes.sm,
-    fontStyle: 'italic',
-    textAlign: 'center',
+    fontWeight: typography.weights.medium,
+    lineHeight: typography.lineHeights.relaxed * typography.sizes.sm,
+    marginBottom: 16,
   },
   goalsSection: {
-    flex: 1,
+    marginTop: 8,
   },
   goalsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   goalsTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
   },
-  goalsLabel: {
+  goalsProgress: {
     fontSize: typography.sizes.sm,
-    fontWeight: '500',
-    marginLeft: 8,
-  },
-  addButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  addButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 32,
-    height: 32,
-  },
-  addButtonText: {
-    fontSize: typography.sizes.xs,
-    fontWeight: '600',
-  },
-  emptyText: {
-    fontSize: typography.sizes.sm,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    paddingVertical: 16,
-  },
-  goalsList: {
-    maxHeight: 200,
-  },
-  goalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  goalContent: {
-    flex: 1,
-  },
-  goalInfo: {
-    marginBottom: 8,
-  },
-  goalSin: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  goalVirtue: {
-    fontSize: typography.sizes.xs,
-    fontWeight: '500',
-  },
-  goalProgress: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    fontWeight: typography.weights.bold,
   },
   progressBar: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    marginRight: 8,
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 2,
+    borderRadius: 3,
   },
-  progressText: {
-    fontSize: typography.sizes.xs,
-    fontWeight: '500',
-    minWidth: 32,
-  },
-  goalAction: {
-    padding: 4,
-  },
-  moreGoalsText: {
-    fontSize: typography.sizes.xs,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    paddingVertical: 8,
-  },
-  modalOverlay: {
+  modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-  },
-  modalContent: {
-    width: '100%',
-    maxWidth: 400,
-    borderRadius: 16,
-    padding: 20,
-    maxHeight: '80%',
+    borderBottomWidth: 1,
   },
   modalTitle: {
-    fontSize: typography.sizes.lg,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
   },
-  inputContainer: {
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  section: {
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
   },
-  inputLabel: {
-    fontSize: typography.sizes.sm,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  textInput: {
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: typography.sizes.md,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  modalButton: {
+  sectionTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    marginLeft: 12,
     flex: 1,
-    height: 44,
-    borderRadius: 8,
+  },
+  sectionSubtitle: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+    marginBottom: 16,
+    lineHeight: typography.lineHeights.relaxed * typography.sizes.sm,
+  },
+  confessionDate: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
+    marginBottom: 8,
+  },
+  updateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  updateButtonText: {
+    color: '#FFFFFF',
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    marginLeft: 8,
+  },
+  addButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalButtonText: {
+  emptyText: {
     fontSize: typography.sizes.md,
-    fontWeight: '600',
+    fontWeight: typography.weights.medium,
+    textAlign: 'center',
+    lineHeight: typography.lineHeights.relaxed * typography.sizes.md,
   },
-  commonSinsList: {
-    maxHeight: 400,
-  },
-  commonSinItem: {
+  goalItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
+    borderWidth: 1,
     marginBottom: 8,
   },
-  commonSinContent: {
+  goalCheckbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    marginTop: 2,
+  },
+  goalText: {
     flex: 1,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
+    lineHeight: typography.lineHeights.relaxed * typography.sizes.md,
   },
-  commonSinName: {
+  removeButton: {
+    padding: 4,
+    marginLeft: 8,
+  },
+  sinItem: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  sinHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  sinText: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+  },
+  arrowText: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
+    marginHorizontal: 8,
+  },
+  virtueText: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+  },
+  sinDescription: {
     fontSize: typography.sizes.sm,
-    fontWeight: '600',
-    marginBottom: 2,
+    fontWeight: typography.weights.medium,
+    lineHeight: typography.lineHeights.relaxed * typography.sizes.sm,
   },
-  commonSinVirtue: {
-    fontSize: typography.sizes.xs,
-    fontWeight: '500',
-    marginBottom: 4,
+  textInput: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: typography.sizes.md,
+    textAlignVertical: 'top',
+    marginBottom: 16,
   },
-  commonSinDescription: {
-    fontSize: typography.sizes.xs,
+  addGoalButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+  },
+  addGoalButtonText: {
+    color: '#FFFFFF',
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    marginLeft: 8,
   },
 });

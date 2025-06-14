@@ -4,7 +4,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { colors } from '@/constants/colors';
 import { typography } from '@/constants/typography';
-import { Flame, Target, Calendar, CheckCircle, Award, TrendingUp, BookOpen } from 'lucide-react-native';
+import { Flame, Target, Award, TrendingUp, BookOpen, CheckCircle } from 'lucide-react-native';
 
 interface StreakProgressProps {
   onPress?: () => void;
@@ -24,15 +24,15 @@ export const StreakProgress: React.FC<StreakProgressProps> = ({ onPress }) => {
     const goal = dailyGoal;
     
     if (streakData.todayProgress.goalCompleted) {
-      return "Your sins are forgiven my child 🙏";
+      return "🙏 Your daily spiritual goal is complete! Well done.";
     } else if (listened === 0) {
-      return `Begin your spiritual journey - listen to ${goal} teachings for divine forgiveness`;
+      return `Begin your spiritual journey today - ${goal} teachings await`;
     } else if (listened < goal / 3) {
-      return `Good start! Listen to ${remaining} more teachings for forgiveness`;
+      return `Great start! ${remaining} more teachings to reach your goal`;
     } else if (listened < goal * 2/3) {
-      return `You are on the right path - ${remaining} teachings remaining for blessing`;
+      return `You're making progress! ${remaining} teachings remaining`;
     } else {
-      return `Almost there! Just ${remaining} more teachings for divine forgiveness`;
+      return `Almost there! Just ${remaining} more to complete your goal`;
     }
   };
   
@@ -44,26 +44,38 @@ export const StreakProgress: React.FC<StreakProgressProps> = ({ onPress }) => {
     >
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Target size={20} color={theme.primary} />
-          <Text style={[styles.title, { color: theme.text }]}>Daily Spiritual Goal</Text>
+          <View style={[styles.iconContainer, { backgroundColor: theme.primary + '20' }]}>
+            <Target size={20} color={theme.primary} />
+          </View>
+          <View>
+            <Text style={[styles.title, { color: theme.text }]}>Daily Spiritual Goal</Text>
+            <Text style={[styles.subtitle, { color: theme.secondary }]}>
+              Stay consistent in your faith journey
+            </Text>
+          </View>
         </View>
         
-        <View style={styles.streakContainer}>
+        <View style={[styles.streakContainer, { backgroundColor: '#FF6B35' + '20' }]}>
           <Flame size={16} color="#FF6B35" />
           <Text style={[styles.streakText, { color: theme.text }]}>
-            {streakData.currentStreak} days
+            {streakData.currentStreak}
           </Text>
         </View>
       </View>
       
-      <View style={styles.progressContainer}>
+      <View style={styles.progressSection}>
         <View style={styles.progressHeader}>
           <Text style={[styles.progressLabel, { color: theme.text }]}>
-            Teachings Listened Today
+            Today's Progress
           </Text>
-          <Text style={[styles.progressCount, { color: theme.primary }]}>
-            {streakData.todayProgress.quotesListened} of {dailyGoal}
-          </Text>
+          <View style={styles.progressCount}>
+            {streakData.todayProgress.goalCompleted && (
+              <CheckCircle size={16} color={theme.success} />
+            )}
+            <Text style={[styles.progressNumbers, { color: theme.primary }]}>
+              {streakData.todayProgress.quotesListened} / {dailyGoal}
+            </Text>
+          </View>
         </View>
         
         <View style={[styles.progressBar, { backgroundColor: theme.border }]}>
@@ -71,57 +83,57 @@ export const StreakProgress: React.FC<StreakProgressProps> = ({ onPress }) => {
             style={[
               styles.progressFill, 
               { 
-                backgroundColor: streakData.todayProgress.goalCompleted ? '#4CAF50' : theme.primary,
+                backgroundColor: streakData.todayProgress.goalCompleted ? theme.success : theme.primary,
                 width: `${progressPercentage}%` 
               }
             ]} 
           />
         </View>
         
-        <Text style={[styles.progressText, { color: theme.secondary }]}>
+        <Text style={[styles.motivationText, { color: theme.secondary }]}>
           {getMotivationalMessage()}
         </Text>
       </View>
       
-      <View style={styles.statsRow}>
+      <View style={styles.statsGrid}>
         <View style={styles.statItem}>
-          <View style={styles.statHeader}>
+          <View style={[styles.statIcon, { backgroundColor: theme.primary + '15' }]}>
             <BookOpen size={16} color={theme.primary} />
-            <Text style={[styles.statNumber, { color: theme.text }]}>
-              {streakData.todayProgress.quotesListened}
-            </Text>
           </View>
-          <Text style={[styles.statLabel, { color: theme.secondary }]}>Listened Today</Text>
+          <Text style={[styles.statNumber, { color: theme.text }]}>
+            {streakData.todayProgress.quotesListened}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.secondary }]}>Today</Text>
         </View>
         
         <View style={styles.statItem}>
-          <View style={styles.statHeader}>
+          <View style={[styles.statIcon, { backgroundColor: '#FF6B35' + '15' }]}>
             <Flame size={16} color="#FF6B35" />
-            <Text style={[styles.statNumber, { color: theme.text }]}>
-              {streakData.currentStreak}
-            </Text>
           </View>
-          <Text style={[styles.statLabel, { color: theme.secondary }]}>Days in a Row</Text>
+          <Text style={[styles.statNumber, { color: theme.text }]}>
+            {streakData.currentStreak}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.secondary }]}>Streak</Text>
         </View>
         
         <View style={styles.statItem}>
-          <View style={styles.statHeader}>
-            <Award size={16} color="#D4AF37" />
-            <Text style={[styles.statNumber, { color: theme.text }]}>
-              {streakData.longestStreak}
-            </Text>
+          <View style={[styles.statIcon, { backgroundColor: theme.accent + '15' }]}>
+            <Award size={16} color={theme.accent} />
           </View>
-          <Text style={[styles.statLabel, { color: theme.secondary }]}>Best Streak</Text>
+          <Text style={[styles.statNumber, { color: theme.text }]}>
+            {streakData.longestStreak}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.secondary }]}>Best</Text>
         </View>
         
         <View style={styles.statItem}>
-          <View style={styles.statHeader}>
-            <TrendingUp size={16} color={theme.primary} />
-            <Text style={[styles.statNumber, { color: theme.text }]}>
-              {streakData.totalQuotesListened || 0}
-            </Text>
+          <View style={[styles.statIcon, { backgroundColor: theme.success + '15' }]}>
+            <TrendingUp size={16} color={theme.success} />
           </View>
-          <Text style={[styles.statLabel, { color: theme.secondary }]}>All Time Total</Text>
+          <Text style={[styles.statNumber, { color: theme.text }]}>
+            {streakData.totalQuotesListened || 0}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.secondary }]}>Total</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -130,99 +142,119 @@ export const StreakProgress: React.FC<StreakProgressProps> = ({ onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 16,
+    marginHorizontal: 20,
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 12,
+    elevation: 6,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    alignItems: 'flex-start',
+    marginBottom: 20,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   title: {
-    fontSize: typography.sizes.md,
-    fontWeight: '600',
-    marginLeft: 8,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    marginBottom: 2,
+  },
+  subtitle: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
   },
   streakContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
   },
   streakText: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '600',
-    marginLeft: 4,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.bold,
+    marginLeft: 6,
   },
-  progressContainer: {
-    marginBottom: 16,
+  progressSection: {
+    marginBottom: 20,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   progressLabel: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '500',
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
   },
   progressCount: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '700',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  progressNumbers: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.bold,
   },
   progressBar: {
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   progressFill: {
     height: '100%',
     borderRadius: 4,
   },
-  progressText: {
+  motivationText: {
     fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
     textAlign: 'center',
-    lineHeight: typography.sizes.sm * 1.3,
-    fontStyle: 'italic',
+    lineHeight: typography.lineHeights.relaxed * typography.sizes.sm,
   },
-  statsRow: {
+  statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
-  statHeader: {
-    flexDirection: 'row',
+  statIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   statNumber: {
     fontSize: typography.sizes.lg,
-    fontWeight: '700',
-    marginLeft: 4,
+    fontWeight: typography.weights.bold,
+    marginBottom: 2,
   },
   statLabel: {
     fontSize: typography.sizes.xs,
-    fontWeight: '500',
+    fontWeight: typography.weights.medium,
     textAlign: 'center',
   },
 });

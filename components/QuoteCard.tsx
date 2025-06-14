@@ -37,7 +37,8 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({
   const isCurrentlyPlaying = isCurrentQuote && isPlaying;
   const isFavorited = favorites.includes(quote.id);
   
-  const handlePlayPause = () => {
+  const handlePlayPause = (e: any) => {
+    e.stopPropagation();
     if (isCurrentQuote) {
       isPlaying ? pauseQuote() : resumeQuote();
     } else {
@@ -45,16 +46,17 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({
     }
   };
   
-  const handleFavorite = () => {
+  const handleFavorite = (e: any) => {
+    e.stopPropagation();
     toggleFavorite(quote.id);
   };
   
   if (compact) {
     return (
       <TouchableOpacity 
-        style={[styles.compactContainer, { backgroundColor: theme.card }]} 
+        style={[styles.compactContainer, { backgroundColor: theme.card, borderColor: theme.border }]} 
         onPress={onPress}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
       >
         <Image 
           source={{ uri: quote.imageUrl }} 
@@ -72,25 +74,37 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({
             {quote.category}
           </Text>
         </View>
-        <TouchableOpacity 
-          style={styles.compactPlayButton} 
-          onPress={handlePlayPause}
-        >
-          {isCurrentlyPlaying ? (
-            <Pause size={20} color={theme.text} />
-          ) : (
-            <Play size={20} color={theme.text} />
-          )}
-        </TouchableOpacity>
+        <View style={styles.compactControls}>
+          <TouchableOpacity 
+            style={[styles.compactFavoriteButton, { backgroundColor: isFavorited ? theme.error + '20' : theme.muted }]} 
+            onPress={handleFavorite}
+          >
+            <Heart 
+              size={16} 
+              color={isFavorited ? theme.error : theme.secondary} 
+              fill={isFavorited ? theme.error : 'transparent'} 
+            />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.compactPlayButton, { backgroundColor: theme.primary }]} 
+            onPress={handlePlayPause}
+          >
+            {isCurrentlyPlaying ? (
+              <Pause size={16} color="#FFFFFF" />
+            ) : (
+              <Play size={16} color="#FFFFFF" fill="#FFFFFF" />
+            )}
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     );
   }
   
   return (
     <TouchableOpacity 
-      style={[styles.container, { backgroundColor: theme.card }]} 
+      style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]} 
       onPress={onPress}
-      activeOpacity={0.9}
+      activeOpacity={0.95}
     >
       <Image 
         source={{ uri: quote.imageUrl }} 
@@ -98,11 +112,11 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({
         contentFit="cover"
       />
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.7)']}
+        colors={['transparent', 'rgba(0,0,0,0.9)']}
         style={styles.gradient}
       />
       <View style={styles.content}>
-        <View style={styles.categoryContainer}>
+        <View style={[styles.categoryBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
           <Text style={styles.category}>{quote.category}</Text>
         </View>
         <Text style={styles.quote}>{quote.text}</Text>
@@ -111,24 +125,24 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({
         
         <View style={styles.controls}>
           <TouchableOpacity 
-            style={[styles.favoriteButton, isFavorited && styles.favoriteActive]} 
+            style={[styles.favoriteButton, { backgroundColor: isFavorited ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.15)' }]} 
             onPress={handleFavorite}
           >
             <Heart 
-              size={24} 
-              color={isFavorited ? '#E25822' : '#FFFFFF'} 
-              fill={isFavorited ? '#E25822' : 'transparent'} 
+              size={20} 
+              color="#FFFFFF" 
+              fill={isFavorited ? '#EF4444' : 'transparent'} 
             />
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={styles.playButton} 
+            style={[styles.playButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]} 
             onPress={handlePlayPause}
           >
             {isCurrentlyPlaying ? (
-              <Pause size={28} color="#FFFFFF" />
+              <Pause size={24} color="#FFFFFF" />
             ) : (
-              <Play size={28} color="#FFFFFF" />
+              <Play size={24} color="#FFFFFF" fill="#FFFFFF" />
             )}
           </TouchableOpacity>
         </View>
@@ -141,16 +155,17 @@ const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     marginVertical: 8,
-    height: 400,
+    height: 360,
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   image: {
     width: '100%',
@@ -162,58 +177,56 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: '70%',
+    height: '75%',
   },
   content: {
     flex: 1,
     justifyContent: 'flex-end',
-    padding: 20,
+    padding: 24,
   },
-  categoryContainer: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+  categoryBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 16,
     alignSelf: 'flex-start',
     marginBottom: 16,
   },
   category: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.xs,
-    fontWeight: '600',
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
   },
   quote: {
     color: '#FFFFFF',
     fontSize: typography.sizes.xl,
-    fontFamily: typography.quoteFont,
+    fontWeight: typography.weights.semibold,
     marginBottom: 12,
-    lineHeight: typography.sizes.xl * 1.4,
+    lineHeight: typography.lineHeights.normal * typography.sizes.xl,
+    fontFamily: typography.fonts.quote,
   },
   attribution: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.sm,
-    fontWeight: '500',
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     marginBottom: 4,
   },
   reference: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: typography.sizes.sm,
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: typography.sizes.md,
     fontStyle: 'italic',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
   },
   playButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -223,51 +236,62 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  favoriteActive: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   compactContainer: {
     flexDirection: 'row',
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     marginVertical: 6,
-    height: 80,
+    height: 88,
     alignItems: 'center',
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   compactImage: {
-    width: 80,
-    height: 80,
+    width: 88,
+    height: 88,
   },
   compactContent: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   compactText: {
     fontSize: typography.sizes.md,
-    fontFamily: typography.quoteFont,
-    marginBottom: 4,
+    fontWeight: typography.weights.medium,
+    marginBottom: 6,
+    lineHeight: typography.lineHeights.normal * typography.sizes.md,
+    fontFamily: typography.fonts.quote,
   },
   compactCategory: {
-    fontSize: typography.sizes.xs,
-    fontWeight: '500',
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
   },
-  compactPlayButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+  compactControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 16,
+    gap: 8,
+  },
+  compactFavoriteButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+  },
+  compactPlayButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

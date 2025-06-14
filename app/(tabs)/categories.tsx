@@ -7,6 +7,7 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { colors } from '@/constants/colors';
 import { typography } from '@/constants/typography';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Compass } from 'lucide-react-native';
 
 export default function CategoriesScreen() {
   const router = useRouter();
@@ -21,14 +22,17 @@ export default function CategoriesScreen() {
   
   return (
     <ScrollView 
-      style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}
+      style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.text }]}>Categories</Text>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <View style={styles.titleRow}>
+          <Compass size={28} color={theme.primary} />
+          <Text style={[styles.title, { color: theme.text }]}>Explore</Text>
+        </View>
         <Text style={[styles.subtitle, { color: theme.secondary }]}>
-          Browse teachings by topic
+          Discover teachings by topic and theme
         </Text>
       </View>
       
@@ -52,29 +56,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 180, // Extra space for bigger mini player and tab bar
+    paddingBottom: 200,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: 20,
     paddingBottom: 8,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   title: {
-    fontSize: typography.sizes.xxl,
-    fontFamily: typography.quoteFont,
-    marginBottom: 4,
+    fontSize: typography.sizes.xxxl,
+    fontWeight: typography.weights.bold,
+    marginLeft: 12,
+    fontFamily: typography.fonts.heading,
   },
   subtitle: {
-    fontSize: typography.sizes.md,
-    marginBottom: 16,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.medium,
+    lineHeight: typography.lineHeights.normal * typography.sizes.lg,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginHorizontal: 8,
+    marginHorizontal: 12,
+    marginTop: 16,
   },
   footer: {
-    height: 20,
+    height: 40,
   },
 });

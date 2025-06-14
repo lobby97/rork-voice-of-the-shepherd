@@ -67,7 +67,6 @@ export class NotificationService {
               },
             },
             trigger: {
-              type: 'calendar',
               hour: time.hour,
               minute: time.minute,
               repeats: true,
@@ -109,7 +108,6 @@ export class NotificationService {
           data: { type: 'morning_reminder' },
         },
         trigger: {
-          type: 'calendar',
           hour: 8,
           minute: 0,
           repeats: true,
@@ -125,7 +123,6 @@ export class NotificationService {
           data: { type: 'midday_reminder' },
         },
         trigger: {
-          type: 'calendar',
           hour: 12,
           minute: 0,
           repeats: true,
@@ -141,7 +138,6 @@ export class NotificationService {
           data: { type: 'evening_reminder' },
         },
         trigger: {
-          type: 'calendar',
           hour: 20,
           minute: 0,
           repeats: true,
@@ -169,14 +165,14 @@ export class NotificationService {
 
   static getRandomQuoteText(): string {
     const spiritualMessages = [
-      "Your daily spiritual journey awaits",
-      "Listen to God's word and find peace",
-      "Time for your spiritual reflection",
-      "Let His teachings guide your heart",
-      "Your soul thirsts for divine wisdom",
-      "Come and receive today's blessing",
-      "The Lord calls you to listen",
-      "Find strength in His holy word"
+      "Your daily spiritual journey awaits 🙏",
+      "Listen to God's word and find peace ✨",
+      "Time for your spiritual reflection 📖",
+      "Let His teachings guide your heart 💝",
+      "Your soul thirsts for divine wisdom 🌟",
+      "Come and receive today's blessing 🕊️",
+      "The Lord calls you to listen 📢",
+      "Find strength in His holy word 💪"
     ];
     
     const randomMessage = spiritualMessages[Math.floor(Math.random() * spiritualMessages.length)];
@@ -226,7 +222,6 @@ export class NotificationService {
           data: { type: 'test' },
         },
         trigger: {
-          type: 'timeInterval',
           seconds: 2,
         },
       });

@@ -6,6 +6,7 @@ import { colors } from "@/constants/colors";
 import { MiniPlayer } from "@/components/MiniPlayer";
 import { View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { typography } from "@/constants/typography";
 
 export default function TabLayout() {
   const { isDarkMode } = useSettingsStore();
@@ -16,23 +17,23 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: theme.accent,
+          tabBarActiveTintColor: theme.primary,
           tabBarInactiveTintColor: theme.secondary,
           tabBarStyle: {
             backgroundColor: theme.card,
             borderTopColor: theme.border,
-            borderTopWidth: 0.5,
-            paddingTop: 6,
+            borderTopWidth: 1,
+            paddingTop: 8,
             paddingBottom: Platform.select({
-              ios: insets.bottom + 6,
-              default: 8,
+              ios: insets.bottom + 8,
+              default: 12,
             }),
-            paddingHorizontal: 4,
+            paddingHorizontal: 8,
             height: Platform.select({
-              ios: 65 + insets.bottom,
-              android: 65,
-              web: 70,
-              default: 70,
+              ios: 75 + insets.bottom,
+              android: 75,
+              web: 80,
+              default: 80,
             }),
             position: 'absolute',
             bottom: 0,
@@ -40,24 +41,24 @@ export default function TabLayout() {
             right: 0,
             zIndex: 100,
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: -1 },
-            shadowOpacity: 0.08,
-            shadowRadius: 6,
-            elevation: 8,
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 12,
+            elevation: 12,
           },
           headerStyle: {
             backgroundColor: theme.background,
           },
           headerTintColor: theme.text,
           tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: '600',
-            marginTop: 2,
+            fontSize: typography.sizes.xs,
+            fontWeight: typography.weights.semibold,
+            marginTop: 4,
             marginBottom: 0,
           },
           tabBarIconStyle: {
             marginBottom: -2,
-            marginTop: 2,
+            marginTop: 4,
           },
         }}
       >
@@ -68,7 +69,7 @@ export default function TabLayout() {
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <Home 
-                size={focused ? 20 : 18} 
+                size={focused ? 22 : 20} 
                 color={color} 
                 strokeWidth={focused ? 2.5 : 2}
               />
@@ -78,11 +79,11 @@ export default function TabLayout() {
         <Tabs.Screen
           name="categories"
           options={{
-            title: "Categories",
+            title: "Explore",
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <Search 
-                size={focused ? 20 : 18} 
+                size={focused ? 22 : 20} 
                 color={color} 
                 strokeWidth={focused ? 2.5 : 2}
               />
@@ -92,13 +93,14 @@ export default function TabLayout() {
         <Tabs.Screen
           name="favorites"
           options={{
-            title: "Favorites",
+            title: "Saved",
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <BookmarkIcon 
-                size={focused ? 20 : 18} 
+                size={focused ? 22 : 20} 
                 color={color} 
                 strokeWidth={focused ? 2.5 : 2}
+                fill={focused ? color : 'transparent'}
               />
             ),
           }}
@@ -110,7 +112,7 @@ export default function TabLayout() {
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <Settings 
-                size={focused ? 20 : 18} 
+                size={focused ? 22 : 20} 
                 color={color} 
                 strokeWidth={focused ? 2.5 : 2}
               />

@@ -58,7 +58,6 @@ export default function QuoteDetailScreen() {
     if (isCurrentQuote) {
       isPlaying ? pauseQuote() : resumeQuote();
     } else {
-      // Start playing this quote with all quotes as playlist
       playQuote(quote, quotes);
     }
   };
@@ -71,7 +70,6 @@ export default function QuoteDetailScreen() {
   };
   
   const handleShare = () => {
-    // Share functionality would go here
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -90,7 +88,6 @@ export default function QuoteDetailScreen() {
   };
 
   const handlePlayAll = () => {
-    // Start playing from this quote with all quotes as playlist
     playQuote(quote, quotes);
   };
   
@@ -109,11 +106,11 @@ export default function QuoteDetailScreen() {
       />
       
       <LinearGradient
-        colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.8)']}
+        colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.9)']}
         style={styles.gradient}
       />
 
-      {/* Custom Header with Back Button */}
+      {/* Custom Header */}
       <View style={styles.customHeader}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -129,7 +126,7 @@ export default function QuoteDetailScreen() {
             onPress={handlePlayAll}
             activeOpacity={0.8}
           >
-            <List size={20} color="#FFFFFF" strokeWidth={2} />
+            <List size={18} color="#FFFFFF" strokeWidth={2} />
             <Text style={styles.playAllText}>Play All</Text>
           </TouchableOpacity>
         )}
@@ -153,19 +150,19 @@ export default function QuoteDetailScreen() {
         <View style={styles.playerContainer}>
           <View style={styles.playerControls}>
             <TouchableOpacity 
-              style={[styles.favoriteButton, isFavorited && styles.favoriteActive]} 
+              style={[styles.favoriteButton, { backgroundColor: isFavorited ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.15)' }]} 
               onPress={handleFavorite}
             >
               <Heart 
                 size={24} 
                 color="#FFFFFF" 
-                fill={isFavorited ? '#E25822' : 'transparent'} 
+                fill={isFavorited ? '#EF4444' : 'transparent'} 
               />
             </TouchableOpacity>
             
             {showPlaylistControls && (
               <TouchableOpacity 
-                style={styles.controlButton} 
+                style={[styles.controlButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]} 
                 onPress={handlePrevious}
               >
                 <SkipBack size={28} color="#FFFFFF" />
@@ -173,19 +170,19 @@ export default function QuoteDetailScreen() {
             )}
             
             <TouchableOpacity 
-              style={styles.playButton} 
+              style={[styles.playButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]} 
               onPress={handlePlayPause}
             >
               {isCurrentlyPlaying ? (
                 <Pause size={32} color="#FFFFFF" />
               ) : (
-                <Play size={32} color="#FFFFFF" />
+                <Play size={32} color="#FFFFFF" fill="#FFFFFF" />
               )}
             </TouchableOpacity>
             
             {showPlaylistControls && (
               <TouchableOpacity 
-                style={styles.controlButton} 
+                style={[styles.controlButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]} 
                 onPress={handleNext}
               >
                 <SkipForward size={28} color="#FFFFFF" />
@@ -193,7 +190,7 @@ export default function QuoteDetailScreen() {
             )}
             
             <TouchableOpacity 
-              style={styles.shareButton} 
+              style={[styles.shareButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]} 
               onPress={handleShare}
             >
               <Share2 size={24} color="#FFFFFF" />
@@ -216,7 +213,7 @@ export default function QuoteDetailScreen() {
         </View>
         
         <View style={styles.explanationContainer}>
-          <Text style={styles.explanationTitle}>Explanation</Text>
+          <Text style={styles.explanationTitle}>Reflection</Text>
           <Text style={styles.explanation}>{quote.explanation}</Text>
         </View>
       </ScrollView>
@@ -249,132 +246,126 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1000,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.4)',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowRadius: 8,
+    elevation: 8,
   },
   playAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowRadius: 8,
+    elevation: 8,
   },
   playAllText: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.sm,
-    fontWeight: '600',
-    marginLeft: 6,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    marginLeft: 8,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    padding: 20,
-    paddingTop: 120,
-    paddingBottom: 40,
+    padding: 24,
+    paddingTop: 140,
+    paddingBottom: 60,
   },
   categoryContainer: {
     backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
     alignSelf: 'flex-start',
     marginBottom: 24,
   },
   category: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.xs,
-    fontWeight: '600',
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
   },
   quote: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.xxl,
-    fontFamily: typography.quoteFont,
-    marginBottom: 16,
-    lineHeight: typography.sizes.xxl * 1.4,
+    fontSize: typography.sizes.xxxl,
+    fontWeight: typography.weights.semibold,
+    marginBottom: 20,
+    lineHeight: typography.lineHeights.normal * typography.sizes.xxxl,
+    fontFamily: typography.fonts.quote,
   },
   attribution: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.md,
-    fontWeight: '500',
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.medium,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   reference: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: typography.sizes.md,
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: typography.sizes.lg,
     fontStyle: 'italic',
-    marginBottom: 40,
+    marginBottom: 48,
   },
   playerContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 48,
   },
   playerControls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   playButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 20,
+    marginHorizontal: 24,
   },
   controlButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: 12,
   },
   favoriteButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
     left: 0,
   },
-  favoriteActive: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
-  },
   shareButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
@@ -385,30 +376,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   playlistText: {
     color: 'rgba(255,255,255,0.8)',
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
   },
   waveformContainer: {
-    marginTop: 20,
+    marginTop: 24,
   },
   explanationContainer: {
     backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 20,
+    padding: 24,
   },
   explanationTitle: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.lg,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    marginBottom: 16,
   },
   explanation: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.md,
-    lineHeight: typography.sizes.md * 1.6,
+    fontSize: typography.sizes.lg,
+    lineHeight: typography.lineHeights.relaxed * typography.sizes.lg,
+    fontWeight: typography.weights.medium,
   },
   errorText: {
     fontSize: typography.sizes.lg,
