@@ -67,6 +67,7 @@ export class NotificationService {
               },
             },
             trigger: {
+              type: 'calendar',
               hour: time.hour,
               minute: time.minute,
               repeats: true,
@@ -108,6 +109,7 @@ export class NotificationService {
           data: { type: 'morning_reminder' },
         },
         trigger: {
+          type: 'calendar',
           hour: 8,
           minute: 0,
           repeats: true,
@@ -123,6 +125,7 @@ export class NotificationService {
           data: { type: 'midday_reminder' },
         },
         trigger: {
+          type: 'calendar',
           hour: 12,
           minute: 0,
           repeats: true,
@@ -138,6 +141,7 @@ export class NotificationService {
           data: { type: 'evening_reminder' },
         },
         trigger: {
+          type: 'calendar',
           hour: 20,
           minute: 0,
           repeats: true,
@@ -222,6 +226,7 @@ export class NotificationService {
           data: { type: 'test' },
         },
         trigger: {
+          type: 'timeInterval',
           seconds: 2,
         },
       });

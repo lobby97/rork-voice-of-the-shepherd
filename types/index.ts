@@ -1,34 +1,38 @@
 export interface Quote {
   id: string;
   text: string;
-  attribution: string;
-  category: string;
-  explanation: string;
-  imageUrl: string;
-  audioUrl: string;
   reference: string;
+  category: string;
+  audioUrl: string;
+  imageUrl: string;
+  duration: number;
 }
 
 export interface Category {
   id: string;
   name: string;
-  icon: string;
   description: string;
+  imageUrl: string;
+  quoteCount: number;
 }
 
-export interface DailyProgress {
-  date: string; // YYYY-MM-DD format
-  quotesListened: number;
-  completed: boolean; // true if reached 3+ quotes
+export interface PlayerState {
+  currentQuote: Quote | null;
+  isPlaying: boolean;
+  position: number;
+  duration: number;
+  playlist: Quote[];
+  currentIndex: number;
+  isLoading: boolean;
+  volume: number;
+  playbackRate: number;
 }
 
-export interface StreakData {
-  currentStreak: number;
-  longestStreak: number;
-  totalDaysCompleted: number;
-  dailyProgress: DailyProgress[];
-  lastCompletedDate: string | null;
-  todayProgress: DailyProgress;
+export interface ConfessionData {
+  lastConfessionDate: string | null;
+  spiritualGoals: SpiritualGoal[];
+  confessionReminder: boolean;
+  reminderDays: number;
 }
 
 export interface SpiritualGoal {
@@ -41,17 +45,10 @@ export interface SpiritualGoal {
   isActive: boolean;
 }
 
-export interface ConfessionData {
-  lastConfessionDate: string | null;
-  spiritualGoals: SpiritualGoal[];
-  confessionReminder: boolean;
-  reminderDays: number; // days between confession reminders
-}
-
 export interface CommonSin {
   id: string;
   sin: string;
   virtue: string;
   description: string;
-  category: 'pride' | 'greed' | 'lust' | 'envy' | 'gluttony' | 'wrath' | 'sloth';
+  category: 'pride' | 'wrath' | 'envy' | 'greed' | 'sloth' | 'gluttony' | 'lust';
 }
