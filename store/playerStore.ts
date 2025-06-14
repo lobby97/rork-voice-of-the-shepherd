@@ -21,6 +21,7 @@ interface StreakData {
 interface PlayerState {
   currentQuote: Quote | null;
   playlist: Quote[];
+  currentPlaylist: Quote[];
   currentIndex: number;
   isPlaying: boolean;
   favorites: string[];
@@ -36,6 +37,7 @@ interface PlayerState {
   nextQuote: () => void;
   previousQuote: () => void;
   toggleFavorite: (quoteId: string) => void;
+  isFavorite: (quoteId: string) => boolean;
   addToHistory: (quoteId: string) => void;
   setDailyGoal: (goal: number) => void;
   incrementListenedCount: () => void;
@@ -65,6 +67,7 @@ export const usePlayerStore = create<PlayerState>()(
     (set, get) => ({
       currentQuote: null,
       playlist: [],
+      currentPlaylist: [],
       currentIndex: 0,
       isPlaying: false,
       favorites: [],
@@ -80,6 +83,7 @@ export const usePlayerStore = create<PlayerState>()(
         set({
           currentQuote: quote,
           playlist: newPlaylist,
+          currentPlaylist: newPlaylist,
           currentIndex: index >= 0 ? index : 0,
           isPlaying: true,
         });
@@ -90,10 +94,10 @@ export const usePlayerStore = create<PlayerState>()(
       resumeQuote: () => set({ isPlaying: true }),
 
       nextQuote: () => {
-        const { playlist, currentIndex } = get();
-        if (playlist.length > 0) {
-          const nextIndex = (currentIndex + 1) % playlist.length;
-          const nextQuote = playlist[nextIndex];
+        const { currentPlaylist, currentIndex } = get();
+        if (currentPlaylist.length > 0) {
+          const nextIndex = (currentIndex + 1) % currentPlaylist.length;
+          const nextQuote = currentPlaylist[nextIndex];
           set({
             currentQuote: nextQuote,
             currentIndex: nextIndex,
@@ -102,10 +106,10 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       previousQuote: () => {
-        const { playlist, currentIndex } = get();
-        if (playlist.length > 0) {
-          const prevIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
-          const prevQuote = playlist[prevIndex];
+        const { currentPlaylist, currentIndex } = get();
+        if (currentPlaylist.length > 0) {
+          const prevIndex = currentIndex === 0 ? currentPlaylist.length - 1 : currentIndex - 1;
+          const prevQuote = currentPlaylist[prevIndex];
           set({
             currentQuote: prevQuote,
             currentIndex: prevIndex,
@@ -119,6 +123,11 @@ export const usePlayerStore = create<PlayerState>()(
             ? state.favorites.filter(id => id !== quoteId)
             : [...state.favorites, quoteId]
         }));
+      },
+
+      isFavorite: (quoteId) => {
+        const { favorites } = get();
+        return favorites.includes(quoteId);
       },
 
       addToHistory: (quoteId) => {

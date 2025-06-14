@@ -23,7 +23,7 @@ export const ConfessionTracker: React.FC = () => {
   const theme = isDarkMode ? colors.dark : colors.light;
   
   const daysSinceConfession = lastConfessionDate 
-    ? Math.floor((Date.now() - lastConfessionDate.getTime()) / (1000 * 60 * 60 * 24))
+    ? Math.floor((Date.now() - new Date(lastConfessionDate).getTime()) / (1000 * 60 * 60 * 24))
     : null;
   
   const completedGoals = spiritualGoals.filter(goal => goal.completed).length;
@@ -51,10 +51,9 @@ export const ConfessionTracker: React.FC = () => {
   
   const handleAddGoal = (sinData?: { sin: string; virtue: string; description: string }) => {
     if (sinData) {
-      const goalText = `Overcome ${sinData.sin} through ${sinData.virtue}: ${sinData.description}`;
-      addSpiritualGoal(goalText);
+      addSpiritualGoal(sinData.sin, sinData.virtue, sinData.description);
     } else if (newGoal.trim()) {
-      addSpiritualGoal(newGoal.trim());
+      addSpiritualGoal(newGoal.trim(), '', '');
       setNewGoal('');
     }
     setShowGoalModal(false);
@@ -154,7 +153,7 @@ export const ConfessionTracker: React.FC = () => {
               
               <Text style={[styles.confessionDate, { color: theme.secondary }]}>
                 {lastConfessionDate 
-                  ? `${lastConfessionDate.toLocaleDateString()} (${daysSinceConfession} days ago)`
+                  ? `${new Date(lastConfessionDate).toLocaleDateString()} (${daysSinceConfession} days ago)`
                   : 'Not recorded yet'
                 }
               </Text>

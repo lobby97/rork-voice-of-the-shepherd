@@ -6,6 +6,8 @@ export interface Quote {
   audioUrl: string;
   imageUrl: string;
   duration: number;
+  attribution: string;
+  explanation: string;
 }
 
 export interface Category {
@@ -43,6 +45,8 @@ export interface SpiritualGoal {
   progress: number; // 0-100
   dateAdded: string;
   isActive: boolean;
+  completed: boolean;
+  text: string;
 }
 
 export interface CommonSin {

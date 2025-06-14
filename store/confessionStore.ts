@@ -6,10 +6,12 @@ import { ConfessionData, SpiritualGoal, CommonSin } from '@/types';
 interface ConfessionState extends ConfessionData {
   // Actions
   setLastConfessionDate: (date: string) => void;
+  updateLastConfessionDate: (date: Date) => void;
   addSpiritualGoal: (sin: string, virtue: string, description?: string) => void;
   removeSpiritualGoal: (id: string) => void;
   updateGoalProgress: (id: string, progress: number) => void;
   toggleGoalActive: (id: string) => void;
+  toggleGoalCompleted: (id: string) => void;
   setConfessionReminder: (enabled: boolean) => void;
   setReminderDays: (days: number) => void;
   getDaysSinceLastConfession: () => number | null;
@@ -74,7 +76,12 @@ export const useConfessionStore = create<ConfessionState>()(
         set({ lastConfessionDate: date });
       },
 
+      updateLastConfessionDate: (date) => {
+        set({ lastConfessionDate: date.toISOString().split('T')[0] });
+      },
+
       addSpiritualGoal: (sin, virtue, description = '') => {
+        const goalText = description ? `Overcome ${sin} through ${virtue}: ${description}` : `Overcome ${sin} through ${virtue}`;
         const newGoal: SpiritualGoal = {
           id: Date.now().toString(),
           sin,
@@ -83,6 +90,8 @@ export const useConfessionStore = create<ConfessionState>()(
           progress: 0,
           dateAdded: new Date().toISOString().split('T')[0],
           isActive: true,
+          completed: false,
+          text: goalText,
         };
         
         set((state) => ({
@@ -108,6 +117,14 @@ export const useConfessionStore = create<ConfessionState>()(
         set((state) => ({
           spiritualGoals: state.spiritualGoals.map(goal =>
             goal.id === id ? { ...goal, isActive: !goal.isActive } : goal
+          )
+        }));
+      },
+
+      toggleGoalCompleted: (id) => {
+        set((state) => ({
+          spiritualGoals: state.spiritualGoals.map(goal =>
+            goal.id === id ? { ...goal, completed: !goal.completed } : goal
           )
         }));
       },
