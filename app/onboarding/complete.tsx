@@ -10,8 +10,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CompleteScreen() {
   const router = useRouter();
-  const { isDarkMode, completeOnboarding, personalInfo } = useSettingsStore();
+  const { isDarkMode, completeOnboarding } = useSettingsStore();
   const insets = useSafeAreaInsets();
+  const theme = isDarkMode ? colors.dark : colors.light;
 
   const handleComplete = () => {
     completeOnboarding();
@@ -29,9 +30,7 @@ export default function CompleteScreen() {
             <CheckCircle size={64} color="#FFFFFF" fill="#FFFFFF" />
           </View>
           
-          <Text style={styles.title}>
-            {personalInfo.name ? `Welcome, ${personalInfo.name}!` : 'Welcome!'}
-          </Text>
+          <Text style={styles.title}>You are Ready!</Text>
           <Text style={styles.subtitle}>
             Your spiritual journey begins now
           </Text>
@@ -59,7 +58,7 @@ export default function CompleteScreen() {
           
           <View style={styles.featureItem}>
             <Heart size={20} color="rgba(255,255,255,0.9)" />
-            <Text style={styles.featureText}>Emergency spiritual support</Text>
+            <Text style={styles.featureText}>Build lasting habits</Text>
           </View>
         </View>
 

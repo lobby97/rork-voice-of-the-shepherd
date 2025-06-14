@@ -70,7 +70,7 @@ export class NotificationService {
               hour: time.hour,
               minute: time.minute,
               repeats: true,
-            },
+            } as any, // Type assertion to bypass TypeScript issue
           });
           
           console.log(`Scheduled notification for ${time.label} at ${time.hour}:${time.minute.toString().padStart(2, '0')} with ID: ${notificationId}`);
@@ -111,7 +111,7 @@ export class NotificationService {
           hour: 8,
           minute: 0,
           repeats: true,
-        },
+        } as any,
       });
 
       // Midday notification (12 PM)
@@ -126,7 +126,7 @@ export class NotificationService {
           hour: 12,
           minute: 0,
           repeats: true,
-        },
+        } as any,
       });
 
       // Evening notification (8 PM)
@@ -141,7 +141,7 @@ export class NotificationService {
           hour: 20,
           minute: 0,
           repeats: true,
-        },
+        } as any,
       });
 
       console.log('Daily notifications scheduled successfully');
@@ -223,7 +223,7 @@ export class NotificationService {
         },
         trigger: {
           seconds: 2,
-        },
+        } as any,
       });
 
       console.log('Test notification scheduled for 2 seconds from now');

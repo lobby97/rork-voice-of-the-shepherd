@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useSettingsStore } from '@/store/settingsStore';
 import { colors } from '@/constants/colors';
 import { typography } from '@/constants/typography';
-import { Heart, Users, Award } from 'lucide-react-native';
+import { Heart, BookOpen, Headphones } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function WelcomeScreen() {
@@ -15,10 +15,11 @@ export default function WelcomeScreen() {
   const theme = isDarkMode ? colors.dark : colors.light;
 
   const handleContinue = () => {
-    router.push('/onboarding/personal');
+    router.push('/onboarding/features');
   };
 
   const handleSkip = () => {
+    // Skip directly to complete onboarding
     router.replace('/onboarding/complete');
   };
 
@@ -36,34 +37,28 @@ export default function WelcomeScreen() {
 
         <Text style={styles.title}>Voice of the Shepherd</Text>
         <Text style={styles.subtitle}>
-          Your spiritual journey starts here
+          Welcome to your spiritual journey
         </Text>
 
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Users size={32} color="#FFFFFF" />
-            <Text style={styles.statNumber}>Millions</Text>
-            <Text style={styles.statLabel}>of believers</Text>
-          </View>
-          
-          <View style={styles.statItem}>
-            <Award size={32} color="#FFFFFF" />
-            <Text style={styles.statNumber}>96%</Text>
-            <Text style={styles.statLabel}>satisfaction</Text>
-          </View>
-          
-          <View style={styles.statItem}>
-            <Heart size={32} color="#FFFFFF" />
-            <Text style={styles.statNumber}>Faith</Text>
-            <Text style={styles.statLabel}>based approach</Text>
-          </View>
-        </View>
+        <Text style={styles.description}>
+          Discover daily wisdom, build spiritual habits, and grow closer to God through carefully curated teachings and reflections.
+        </Text>
 
-        <View style={styles.benefitsContainer}>
-          <Text style={styles.benefitText}>• Daily spiritual teachings</Text>
-          <Text style={styles.benefitText}>• Audio guidance & music</Text>
-          <Text style={styles.benefitText}>• Track your growth</Text>
-          <Text style={styles.benefitText}>• Emergency spiritual support</Text>
+        <View style={styles.featuresContainer}>
+          <View style={styles.featureItem}>
+            <BookOpen size={24} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.featureText}>Daily Teachings</Text>
+          </View>
+          
+          <View style={styles.featureItem}>
+            <Headphones size={24} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.featureText}>Audio Guidance</Text>
+          </View>
+          
+          <View style={styles.featureItem}>
+            <Heart size={24} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.featureText}>Spiritual Growth</Text>
+          </View>
         </View>
 
         <View style={styles.footer}>
@@ -72,7 +67,7 @@ export default function WelcomeScreen() {
             onPress={handleContinue}
             activeOpacity={0.8}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
+            <Text style={styles.continueButtonText}>Begin Your Journey</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -80,15 +75,19 @@ export default function WelcomeScreen() {
             onPress={handleSkip}
             activeOpacity={0.7}
           >
-            <Text style={styles.skipButtonText}>Skip Setup</Text>
+            <Text style={styles.skipButtonText}>Skip Tutorial</Text>
           </TouchableOpacity>
+
+          <Text style={styles.footerText}>
+            "Be still and know that I am God" - Psalm 46:10
+          </Text>
         </View>
       </View>
     </LinearGradient>
   );
 }
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -104,9 +103,9 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   iconWrapper: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -121,47 +120,39 @@ const styles = StyleSheet.create({
     fontFamily: typography.quoteFont,
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
     fontWeight: '700',
   },
   subtitle: {
-    fontSize: typography.sizes.lg,
+    fontSize: typography.sizes.xl,
     color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 24,
     fontWeight: '500',
   },
-  statsContainer: {
+  description: {
+    fontSize: typography.sizes.md,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+    lineHeight: typography.sizes.md * 1.6,
+    marginBottom: 40,
+    maxWidth: width - 80,
+  },
+  featuresContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    marginBottom: 40,
+    marginBottom: 48,
   },
-  statItem: {
+  featureItem: {
     alignItems: 'center',
     flex: 1,
   },
-  statNumber: {
-    color: '#FFFFFF',
-    fontSize: typography.sizes.xl,
-    fontWeight: '700',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  statLabel: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: typography.sizes.sm,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  benefitsContainer: {
-    alignItems: 'flex-start',
-    marginBottom: 48,
-  },
-  benefitText: {
+  featureText: {
     color: 'rgba(255,255,255,0.9)',
-    fontSize: typography.sizes.md,
-    marginBottom: 8,
+    fontSize: typography.sizes.sm,
+    marginTop: 8,
+    textAlign: 'center',
     fontWeight: '500',
   },
   footer: {
@@ -179,8 +170,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
-    width: '100%',
-    alignItems: 'center',
   },
   continueButtonText: {
     color: '#FFFFFF',
@@ -190,10 +179,17 @@ const styles = StyleSheet.create({
   skipButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
+    marginBottom: 24,
   },
   skipButtonText: {
     color: 'rgba(255,255,255,0.7)',
     fontSize: typography.sizes.md,
     fontWeight: '500',
+  },
+  footerText: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: typography.sizes.sm,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });

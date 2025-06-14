@@ -13,8 +13,7 @@ export const MiniPlayer: React.FC = () => {
   const { 
     currentQuote, 
     isPlaying, 
-    playlist,
-    isTikTokMode,
+    currentPlaylist,
     pauseQuote, 
     resumeQuote,
     nextQuote,
@@ -26,8 +25,7 @@ export const MiniPlayer: React.FC = () => {
   
   const theme = isDarkMode ? colors.dark : colors.light;
   
-  // Don't show mini player in TikTok mode
-  if (!currentQuote || isTikTokMode) return null;
+  if (!currentQuote) return null;
   
   const handlePlayPause = () => {
     isPlaying ? pauseQuote() : resumeQuote();
@@ -52,7 +50,7 @@ export const MiniPlayer: React.FC = () => {
     default: 70,
   });
   
-  const showPlaylistControls = playlist.length > 1;
+  const showPlaylistControls = currentPlaylist.length > 1;
   
   return (
     <View style={[styles.container, { bottom: tabBarHeight + 8 }]}>

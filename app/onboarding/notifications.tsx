@@ -10,7 +10,7 @@ import { NotificationService } from '@/services/notificationService';
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const { isDarkMode, toggleDailyNotifications } = useSettingsStore();
+  const { isDarkMode, toggleDailyNotifications, dailyNotifications } = useSettingsStore();
   const insets = useSafeAreaInsets();
   const theme = isDarkMode ? colors.dark : colors.light;
   const [isLoading, setIsLoading] = useState(false);
@@ -19,11 +19,15 @@ export default function NotificationsScreen() {
     router.push('/onboarding/goals');
   };
 
+  const handleSkip = () => {
+    router.push('/onboarding/complete');
+  };
+
   const handleEnableNotifications = async () => {
     if (Platform.OS === 'web') {
       Alert.alert(
         'Not Available',
-        'Notifications are not supported on web browsers.',
+        'Notifications are not supported on web browsers. You can continue without notifications.',
         [{ text: 'Continue', onPress: handleContinue }]
       );
       return;
@@ -35,11 +39,15 @@ export default function NotificationsScreen() {
       const hasPermission = await NotificationService.requestPermissions();
       if (hasPermission) {
         await toggleDailyNotifications();
-        handleContinue();
+        Alert.alert(
+          'Notifications Enabled',
+          'You will receive gentle reminders for your daily spiritual practice.',
+          [{ text: 'Continue', onPress: handleContinue }]
+        );
       } else {
         Alert.alert(
           'Permission Denied',
-          'You can enable notifications later in Settings.',
+          'You can enable notifications later in Settings if you change your mind.',
           [{ text: 'Continue', onPress: handleContinue }]
         );
       }
@@ -47,13 +55,19 @@ export default function NotificationsScreen() {
       console.error('Error setting up notifications:', error);
       Alert.alert(
         'Error',
-        'There was an issue setting up notifications.',
+        'There was an issue setting up notifications. You can try again later in Settings.',
         [{ text: 'Continue', onPress: handleContinue }]
       );
     } finally {
       setIsLoading(false);
     }
   };
+
+  const notificationTimes = [
+    { time: '8:00 AM', label: 'Morning Reflection' },
+    { time: '12:00 PM', label: 'Midday Wisdom' },
+    { time: '8:00 PM', label: 'Evening Peace' },
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -63,58 +77,62 @@ export default function NotificationsScreen() {
             <Bell size={48} color={theme.primary} />
           </View>
           
-          <Text style={[styles.title, { color: theme.text }]}>Stay on track</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Stay Connected</Text>
           <Text style={[styles.subtitle, { color: theme.secondary }]}>
-            Get gentle reminders for your daily practice
+            Receive gentle reminders for your daily spiritual practice
           </Text>
         </View>
 
         <View style={styles.benefitsContainer}>
-          <Text style={[styles.benefitText, { color: theme.secondary }]}>
-            • Build consistent habits
+          <Text style={[styles.benefitsTitle, { color: theme.text }]}>
+            Daily reminders will help you:
           </Text>
-          <Text style={[styles.benefitText, { color: theme.secondary }]}>
-            • Never miss your reflection time
-          </Text>
-          <Text style={[styles.benefitText, { color: theme.secondary }]}>
-            • Stay motivated on your journey
-          </Text>
+          
+          <View style={styles.benefitsList}>
+            <View style={styles.benefitItem}>
+              <View style={[styles.benefitDot, { backgroundColor: theme.primary }]} />
+              <Text style={[styles.benefitText, { color: theme.secondary }]}>
+                Build consistent spiritual habits
+              </Text>
+            </View>
+            
+            <View style={styles.benefitItem}>
+              <View style={[styles.benefitDot, { backgroundColor: theme.primary }]} />
+              <Text style={[styles.benefitText, { color: theme.secondary }]}>
+                Never miss your daily reflection time
+              </Text>
+            </View>
+            
+            <View style={styles.benefitItem}>
+              <View style={[styles.benefitDot, { backgroundColor: theme.primary }]} />
+              <Text style={[styles.benefitText, { color: theme.secondary }]}>
+                Stay motivated on your spiritual journey
+              </Text>
+            </View>
+          </View>
         </View>
 
         <View style={[styles.timesContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <Text style={[styles.timesTitle, { color: theme.text }]}>
-            Default reminder times:
+            Suggested reminder times:
           </Text>
           
-          <View style={styles.timeItem}>
-            <Clock size={16} color={theme.secondary} />
-            <Text style={[styles.timeText, { color: theme.secondary }]}>
-              8:00 AM - Morning Reflection
-            </Text>
-          </View>
-          
-          <View style={styles.timeItem}>
-            <Clock size={16} color={theme.secondary} />
-            <Text style={[styles.timeText, { color: theme.secondary }]}>
-              12:00 PM - Midday Wisdom
-            </Text>
-          </View>
-          
-          <View style={styles.timeItem}>
-            <Clock size={16} color={theme.secondary} />
-            <Text style={[styles.timeText, { color: theme.secondary }]}>
-              8:00 PM - Evening Peace
-            </Text>
-          </View>
+          {notificationTimes.map((item, index) => (
+            <View key={index} style={styles.timeItem}>
+              <Clock size={16} color={theme.secondary} />
+              <Text style={[styles.timeText, { color: theme.secondary }]}>
+                {item.time} - {item.label}
+              </Text>
+            </View>
+          ))}
           
           <Text style={[styles.customizeNote, { color: theme.secondary }]}>
-            Customize these in Settings later
+            You can customize these times later in Settings
           </Text>
         </View>
 
         <View style={styles.progressContainer}>
           <View style={styles.progressDots}>
-            <View style={[styles.dot, { backgroundColor: theme.secondary }]} />
             <View style={[styles.dot, { backgroundColor: theme.secondary }]} />
             <View style={[styles.dot, { backgroundColor: theme.secondary }]} />
             <View style={[styles.dot, styles.activeDot, { backgroundColor: theme.primary }]} />
@@ -126,11 +144,11 @@ export default function NotificationsScreen() {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.skipButton}
-          onPress={handleContinue}
+          onPress={handleSkip}
           activeOpacity={0.7}
         >
           <BellOff size={20} color={theme.secondary} style={styles.skipIcon} />
-          <Text style={[styles.skipButtonText, { color: theme.secondary }]}>Skip</Text>
+          <Text style={[styles.skipButtonText, { color: theme.secondary }]}>Skip for now</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -184,12 +202,29 @@ const styles = StyleSheet.create({
   },
   benefitsContainer: {
     marginBottom: 32,
+  },
+  benefitsTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  benefitsList: {
     paddingLeft: 8,
+  },
+  benefitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  benefitDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 12,
   },
   benefitText: {
     fontSize: typography.sizes.md,
-    marginBottom: 8,
-    fontWeight: '500',
+    flex: 1,
   },
   timesContainer: {
     padding: 20,

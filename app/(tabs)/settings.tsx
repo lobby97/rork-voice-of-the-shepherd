@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Switch, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
+import { StyleSheet, View, Text, Switch, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '@/store/settingsStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { colors } from '@/constants/colors';
 import { typography } from '@/constants/typography';
-import { Moon, Sun, Music, Bell, Heart, RotateCcw, Target, Shield, User, LogIn, LogOut, Check, Edit3, FileText } from 'lucide-react-native';
+import { Moon, Sun, Music, Bell, Heart, RotateCcw, Target } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NotificationService } from '@/services/notificationService';
 import { NotificationTimeManager } from '@/components/NotificationTimeManager';
-import CommitmentModal from '@/components/CommitmentModal';
 import { Platform } from 'react-native';
 
 export default function SettingsScreen() {
@@ -19,40 +18,17 @@ export default function SettingsScreen() {
     enableBackgroundMusic, 
     dailyNotifications,
     notificationTimes,
-    rescueModeSettings,
-    personalInfo,
-    userProfile,
     toggleDarkMode,
     toggleBackgroundMusic,
     toggleDailyNotifications,
-    toggleRescueMode,
-    resetOnboarding,
-    signInUser,
-    signOutUser,
-    updateUserProfile
+    resetOnboarding
   } = useSettingsStore();
   
   const { dailyGoal, setDailyGoal } = usePlayerStore();
   const insets = useSafeAreaInsets();
   const [notificationCount, setNotificationCount] = useState(0);
-  const [showCommitmentModal, setShowCommitmentModal] = useState(false);
   
   const theme = isDarkMode ? colors.dark : colors.light;
-
-  const signInProviders = [
-    {
-      id: 'google' as const,
-      name: 'Continue with Google',
-      icon: '🔍',
-      color: '#4285F4'
-    },
-    {
-      id: 'apple' as const,
-      name: 'Continue with Apple',
-      icon: '🍎',
-      color: '#000000'
-    }
-  ];
 
   useEffect(() => {
     // Check scheduled notifications count
@@ -102,7 +78,7 @@ export default function SettingsScreen() {
           onPress: () => {
             resetOnboarding();
             // Navigate to onboarding immediately
-            router.push('/onboarding/welcome');
+            router.replace('/onboarding/welcome');
           }
         }
       ]
@@ -122,89 +98,8 @@ export default function SettingsScreen() {
       ]
     );
   };
-
-  const handleSignIn = (provider: 'google' | 'apple') => {
-    // Mock sign-in for now
-    const mockUserData = {
-      id: `${provider}_${Date.now()}`,
-      name: provider === 'google' ? 'John Doe' : 'Jane Smith',
-      email: provider === 'google' ? 'john@gmail.com' : 'jane@icloud.com',
-      profilePicture: `https://ui-avatars.com/api/?name=${provider === 'google' ? 'John+Doe' : 'Jane+Smith'}&background=random`,
-      age: personalInfo.age, // Keep age from onboarding
-      spiritualGoals: personalInfo.spiritualGoals, // Keep goals from onboarding
-      hasSignedContract: personalInfo.hasSignedContract,
-      signatureDate: personalInfo.signatureDate,
-    };
-
-    signInUser(provider, mockUserData);
-    
-    Alert.alert(
-      'Sign In Successful',
-      `Welcome ${mockUserData.name}! You are now signed in with ${provider === 'google' ? 'Google' : 'Apple'}.`,
-      [{ text: 'OK' }]
-    );
-  };
-
-  const handleSignOut = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out? Your spiritual progress will be saved locally.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
-          style: 'destructive',
-          onPress: () => {
-            signOutUser();
-            Alert.alert('Signed Out', 'You have been signed out successfully.');
-          }
-        }
-      ]
-    );
-  };
-
-  const handleEditProfile = () => {
-    Alert.alert(
-      'Edit Profile',
-      'What would you like to update?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Update Age', 
-          onPress: () => {
-            Alert.prompt(
-              'Update Age',
-              'Enter your age:',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { 
-                  text: 'Update', 
-                  onPress: (age) => {
-                    if (age && !isNaN(parseInt(age))) {
-                      updateUserProfile({ age: parseInt(age) });
-                      Alert.alert('Success', 'Age updated successfully!');
-                    }
-                  }
-                }
-              ],
-              'plain-text',
-              userProfile.age?.toString() || ''
-            );
-          }
-        },
-        { 
-          text: 'View Contract', 
-          onPress: () => setShowCommitmentModal(true)
-        }
-      ]
-    );
-  };
   
   const enabledNotificationTimes = notificationTimes.filter(t => t.enabled);
-  const displayName = userProfile.name || personalInfo.name;
-  const displayAge = userProfile.age || personalInfo.age;
-  const hasCommitments = (userProfile.spiritualGoals.length > 0 || personalInfo.spiritualGoals.length > 0) || 
-                        (userProfile.hasSignedContract || personalInfo.hasSignedContract);
   
   return (
     <ScrollView 
@@ -216,150 +111,6 @@ export default function SettingsScreen() {
         <Text style={[styles.subtitle, { color: theme.secondary }]}>
           Customize your spiritual journey
         </Text>
-      </View>
-
-      {/* User Profile Section */}
-      <View style={[styles.section, { borderBottomColor: theme.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>
-          Profile
-        </Text>
-        
-        {userProfile.isSignedIn ? (
-          <View style={styles.profileContainer}>
-            <View style={styles.profileHeader}>
-              <View style={styles.profileImageContainer}>
-                {userProfile.profilePicture ? (
-                  <Image 
-                    source={{ uri: userProfile.profilePicture }} 
-                    style={styles.profileImage}
-                  />
-                ) : (
-                  <View style={[styles.profileImagePlaceholder, { backgroundColor: theme.primary }]}>
-                    <User size={32} color="#FFFFFF" />
-                  </View>
-                )}
-              </View>
-              
-              <View style={styles.profileInfo}>
-                <Text style={[styles.profileName, { color: theme.text }]}>
-                  {displayName || 'User'}
-                </Text>
-                {userProfile.email && (
-                  <Text style={[styles.profileEmail, { color: theme.secondary }]}>
-                    {userProfile.email}
-                  </Text>
-                )}
-                {displayAge && (
-                  <Text style={[styles.profileAge, { color: theme.secondary }]}>
-                    Age: {displayAge}
-                  </Text>
-                )}
-                <View style={styles.providerBadge}>
-                  <Text style={styles.providerText}>
-                    {userProfile.signInProvider === 'google' ? '🔍 Google' : '🍎 Apple'}
-                  </Text>
-                </View>
-              </View>
-              
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={handleEditProfile}
-                activeOpacity={0.7}
-              >
-                <Edit3 size={16} color={theme.secondary} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Spiritual Commitments */}
-            {hasCommitments && (
-              <TouchableOpacity
-                style={[styles.commitmentsContainer, { backgroundColor: theme.card, borderColor: theme.border }]}
-                onPress={() => setShowCommitmentModal(true)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.commitmentsHeader}>
-                  <FileText size={20} color={theme.primary} />
-                  <Text style={[styles.commitmentsTitle, { color: theme.text }]}>
-                    Your Spiritual Contract
-                  </Text>
-                </View>
-                
-                <Text style={[styles.commitmentsSubtitle, { color: theme.secondary }]}>
-                  Tap to view your commitments and signature
-                </Text>
-
-                {(userProfile.signatureDate || personalInfo.signatureDate) && (
-                  <Text style={[styles.signatureDate, { color: theme.secondary }]}>
-                    ✍️ Signed on {new Date(userProfile.signatureDate || personalInfo.signatureDate!).toLocaleDateString()}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity
-              style={styles.signOutButton}
-              onPress={handleSignOut}
-              activeOpacity={0.7}
-            >
-              <LogOut size={16} color={theme.secondary} />
-              <Text style={[styles.signOutText, { color: theme.secondary }]}>
-                Sign Out
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.signInContainer}>
-            {displayName && (
-              <View style={styles.localProfileInfo}>
-                <Text style={[styles.localProfileName, { color: theme.text }]}>
-                  Welcome, {displayName}!
-                </Text>
-                {displayAge && (
-                  <Text style={[styles.localProfileAge, { color: theme.secondary }]}>
-                    Age: {displayAge}
-                  </Text>
-                )}
-                {hasCommitments && (
-                  <TouchableOpacity
-                    style={styles.viewContractButton}
-                    onPress={() => setShowCommitmentModal(true)}
-                    activeOpacity={0.7}
-                  >
-                    <FileText size={16} color={theme.primary} />
-                    <Text style={[styles.viewContractText, { color: theme.primary }]}>
-                      View Your Contract
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            )}
-            
-            <Text style={[styles.signInDescription, { color: theme.secondary }]}>
-              Sign in to sync your progress across devices and backup your spiritual journey.
-            </Text>
-            
-            {signInProviders.map((provider) => (
-              <TouchableOpacity
-                key={provider.id}
-                style={[
-                  styles.signInButton,
-                  { 
-                    backgroundColor: theme.card,
-                    borderColor: theme.border,
-                  }
-                ]}
-                onPress={() => handleSignIn(provider.id)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.providerIcon}>{provider.icon}</Text>
-                <Text style={[styles.signInButtonText, { color: theme.text }]}>
-                  {provider.name}
-                </Text>
-                <LogIn size={16} color={theme.secondary} />
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
       </View>
       
       <View style={[styles.section, { borderBottomColor: theme.border }]}>
@@ -384,32 +135,6 @@ export default function SettingsScreen() {
             </View>
           </View>
         </TouchableOpacity>
-      </View>
-
-      <View style={[styles.section, { borderBottomColor: theme.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>
-          Emergency Support
-        </Text>
-        
-        <View style={styles.settingRow}>
-          <View style={styles.settingLabelContainer}>
-            <Shield size={22} color={theme.text} style={styles.settingIcon} />
-            <View>
-              <Text style={[styles.settingLabel, { color: theme.text }]}>
-                Rescue Mode
-              </Text>
-              <Text style={[styles.settingSubtext, { color: theme.secondary }]}>
-                Emergency spiritual support when facing temptation
-              </Text>
-            </View>
-          </View>
-          <Switch
-            value={rescueModeSettings.enabled}
-            onValueChange={toggleRescueMode}
-            trackColor={{ false: '#767577', true: theme.primary }}
-            thumbColor="#FFFFFF"
-          />
-        </View>
       </View>
       
       <View style={[styles.section, { borderBottomColor: theme.border }]}>
@@ -472,7 +197,7 @@ export default function SettingsScreen() {
               </Text>
               {Platform.OS !== 'web' && dailyNotifications && (
                 <Text style={[styles.settingSubtext, { color: theme.secondary }]}>
-                  {enabledNotificationTimes.length} custom times scheduled
+                  {enabledNotificationTimes.length} times scheduled
                 </Text>
               )}
               {Platform.OS === 'web' && (
@@ -564,12 +289,6 @@ export default function SettingsScreen() {
       </Text>
       
       <View style={styles.footer} />
-
-      {/* Commitment Modal */}
-      <CommitmentModal 
-        visible={showCommitmentModal}
-        onClose={() => setShowCommitmentModal(false)}
-      />
     </ScrollView>
   );
 }
@@ -627,147 +346,6 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.xs,
     marginTop: 2,
   },
-  
-  // Profile Section Styles
-  profileContainer: {
-    marginBottom: 8,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  profileImageContainer: {
-    marginRight: 16,
-  },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
-  profileImagePlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: typography.sizes.lg,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  profileEmail: {
-    fontSize: typography.sizes.sm,
-    marginBottom: 2,
-  },
-  profileAge: {
-    fontSize: typography.sizes.sm,
-    marginBottom: 4,
-  },
-  providerBadge: {
-    alignSelf: 'flex-start',
-  },
-  providerText: {
-    fontSize: typography.sizes.xs,
-    color: '#666',
-  },
-  editButton: {
-    padding: 8,
-  },
-  commitmentsContainer: {
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
-  },
-  commitmentsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  commitmentsTitle: {
-    fontSize: typography.sizes.md,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  commitmentsSubtitle: {
-    fontSize: typography.sizes.sm,
-    marginBottom: 8,
-  },
-  signatureDate: {
-    fontSize: typography.sizes.xs,
-    fontStyle: 'italic',
-  },
-  signOutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  signOutText: {
-    fontSize: typography.sizes.sm,
-    marginLeft: 6,
-  },
-  
-  // Local Profile (not signed in) Styles
-  localProfileInfo: {
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  localProfileName: {
-    fontSize: typography.sizes.lg,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  localProfileAge: {
-    fontSize: typography.sizes.sm,
-    marginBottom: 8,
-  },
-  viewContractButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  viewContractText: {
-    fontSize: typography.sizes.sm,
-    marginLeft: 6,
-    fontWeight: '500',
-  },
-  
-  // Sign In Section Styles
-  signInContainer: {
-    marginBottom: 8,
-  },
-  signInDescription: {
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.sizes.sm * 1.4,
-    marginBottom: 16,
-  },
-  signInButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 12,
-  },
-  providerIcon: {
-    fontSize: 20,
-    marginRight: 12,
-  },
-  signInButtonText: {
-    fontSize: typography.sizes.md,
-    fontWeight: '500',
-    flex: 1,
-  },
-  
   supportButton: {
     marginHorizontal: 16,
     borderRadius: 24,

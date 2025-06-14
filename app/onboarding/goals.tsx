@@ -14,16 +14,16 @@ export default function GoalsScreen() {
   const { setDailyGoal } = usePlayerStore();
   const insets = useSafeAreaInsets();
   const theme = isDarkMode ? colors.dark : colors.light;
-  const [selectedGoal, setSelectedGoal] = useState(10);
+  const [selectedGoal, setSelectedGoal] = useState(10); // Default to 10 teachings
 
   const handleContinue = () => {
     setDailyGoal(selectedGoal);
-    router.push('/onboarding/signature');
+    router.push('/onboarding/complete');
   };
 
   const goalOptions = [
     { value: 5, label: '5 teachings', description: 'Perfect for beginners' },
-    { value: 10, label: '10 teachings', description: 'Recommended' },
+    { value: 10, label: '10 teachings', description: 'Recommended for spiritual growth' },
     { value: 15, label: '15 teachings', description: 'For dedicated disciples' },
     { value: 20, label: '20 teachings', description: 'For spiritual warriors' },
   ];
@@ -36,9 +36,9 @@ export default function GoalsScreen() {
             <Target size={48} color={theme.primary} />
           </View>
           
-          <Text style={[styles.title, { color: theme.text }]}>Set your daily goal</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Set Your Daily Goal</Text>
           <Text style={[styles.subtitle, { color: theme.secondary }]}>
-            How many teachings would you like to listen to daily?
+            How many teachings would you like to listen to each day to receive divine forgiveness? We recommend starting with 10 teachings daily.
           </Text>
         </View>
 
@@ -80,14 +80,16 @@ export default function GoalsScreen() {
         </View>
 
         <View style={[styles.infoContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.infoTitle, { color: theme.text }]}>
+            Why set a daily goal?
+          </Text>
           <Text style={[styles.infoText, { color: theme.secondary }]}>
-            Reach your daily goal to receive a divine blessing: "Your sins are forgiven my child" - in the name of Jesus.
+            Consistent daily practice helps build spiritual discipline and creates lasting positive habits. When you reach your goal, you will receive a divine blessing message: "Your sins are forgiven my child" - in the name of Jesus. You can always adjust your goal later in Settings.
           </Text>
         </View>
 
         <View style={styles.progressContainer}>
           <View style={styles.progressDots}>
-            <View style={[styles.dot, { backgroundColor: theme.secondary }]} />
             <View style={[styles.dot, { backgroundColor: theme.secondary }]} />
             <View style={[styles.dot, { backgroundColor: theme.secondary }]} />
             <View style={[styles.dot, { backgroundColor: theme.secondary }]} />
@@ -102,7 +104,7 @@ export default function GoalsScreen() {
           onPress={handleContinue}
           activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>Set Goal & Continue</Text>
           <ArrowRight size={20} color="#FFFFFF" style={styles.arrowIcon} />
         </TouchableOpacity>
       </View>
@@ -179,10 +181,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 32,
   },
+  infoTitle: {
+    fontSize: typography.sizes.md,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
   infoText: {
     fontSize: typography.sizes.sm,
     lineHeight: typography.sizes.sm * 1.4,
-    textAlign: 'center',
   },
   progressContainer: {
     alignItems: 'center',
@@ -219,8 +225,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
-    width: '100%',
-    justifyContent: 'center',
   },
   continueButtonText: {
     color: '#FFFFFF',

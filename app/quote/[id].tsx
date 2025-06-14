@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions, PanGestureHandler, State } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
-import { Heart, Share2, ArrowLeft, MoreHorizontal } from 'lucide-react-native';
+import { useLocalSearchParams, Stack } from 'expo-router';
+import { Play, Pause, Heart, Share2, ArrowLeft, SkipForward, SkipBack, List } from 'lucide-react-native';
 import { quotes } from '@/mocks/quotes';
 import { usePlayerStore } from '@/store/playerStore';
 import { AudioWaveform } from '@/components/AudioWaveform';
@@ -12,12 +12,11 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { colors } from '@/constants/colors';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 export default function QuoteDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { 
     currentQuote, 
     isPlaying,
@@ -26,19 +25,17 @@ export default function QuoteDetailScreen() {
     playQuote, 
     pauseQuote, 
     resumeQuote,
-    swipeToNext,
-    swipeToPrevious,
+    nextQuote,
+    previousQuote,
     toggleFavorite, 
     isFavorite,
-    addToHistory,
-    setTikTokMode
+    addToHistory
   } = usePlayerStore();
   const { isDarkMode } = useSettingsStore();
   
   const theme = isDarkMode ? colors.dark : colors.light;
   
   const quote = quotes.find(q => q.id === id);
-  const [showDetails, setShowDetails] = useState(false);
   
   if (!quote) {
     return (
@@ -51,25 +48,17 @@ export default function QuoteDetailScreen() {
   const isCurrentQuote = currentQuote?.id === quote.id;
   const isCurrentlyPlaying = isCurrentQuote && isPlaying;
   const isFavorited = isFavorite(quote.id);
+  const showPlaylistControls = currentPlaylist.length > 1;
   
   useEffect(() => {
     addToHistory(quote.id);
-    // Enter TikTok mode and start playing this quote with all quotes as playlist
-    if (!isCurrentQuote) {
-      setTikTokMode(true);
-      playQuote(quote, quotes);
-    }
   }, [quote.id]);
   
   const handlePlayPause = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    
     if (isCurrentQuote) {
       isPlaying ? pauseQuote() : resumeQuote();
     } else {
-      setTikTokMode(true);
+      // Start playing this quote with all quotes as playlist
       playQuote(quote, quotes);
     }
   };
@@ -89,33 +78,20 @@ export default function QuoteDetailScreen() {
   };
 
   const handleGoBack = () => {
-    setTikTokMode(false);
     router.back();
   };
 
-  const handleSwipeGesture = (event: any) => {
-    const { translationY, velocityY, state } = event.nativeEvent;
-    
-    if (state === State.END) {
-      const swipeThreshold = 50;
-      const velocityThreshold = 500;
-      
-      if (Math.abs(translationY) > swipeThreshold || Math.abs(velocityY) > velocityThreshold) {
-        if (translationY > 0 || velocityY > 0) {
-          // Swipe down - previous quote
-          const prevQuote = swipeToPrevious();
-          if (prevQuote) {
-            router.replace(`/quote/${prevQuote.id}`);
-          }
-        } else {
-          // Swipe up - next quote
-          const nextQuote = swipeToNext();
-          if (nextQuote) {
-            router.replace(`/quote/${nextQuote.id}`);
-          }
-        }
-      }
-    }
+  const handleNext = () => {
+    nextQuote();
+  };
+
+  const handlePrevious = () => {
+    previousQuote();
+  };
+
+  const handlePlayAll = () => {
+    // Start playing from this quote with all quotes as playlist
+    playQuote(quote, quotes);
   };
   
   return (
@@ -126,114 +102,124 @@ export default function QuoteDetailScreen() {
         }}
       />
       
-      <PanGestureHandler onGestureEvent={handleSwipeGesture}>
-        <View style={styles.gestureContainer}>
-          <TouchableOpacity 
-            style={styles.playPauseArea}
-            onPress={handlePlayPause}
-            activeOpacity={1}
-          >
-            <Image 
-              source={{ uri: quote.imageUrl }} 
-              style={styles.backgroundImage}
-              contentFit="cover"
-            />
-            
-            <LinearGradient
-              colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
-              style={styles.gradient}
-            />
-          </TouchableOpacity>
+      <Image 
+        source={{ uri: quote.imageUrl }} 
+        style={styles.backgroundImage}
+        contentFit="cover"
+      />
+      
+      <LinearGradient
+        colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.8)']}
+        style={styles.gradient}
+      />
 
-          {/* Back Button */}
+      {/* Custom Header with Back Button */}
+      <View style={styles.customHeader}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleGoBack}
+          activeOpacity={0.8}
+        >
+          <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
+        </TouchableOpacity>
+        
+        {!isCurrentQuote && (
           <TouchableOpacity 
-            style={[styles.backButton, { top: insets.top + 16 }]}
-            onPress={handleGoBack}
+            style={styles.playAllButton}
+            onPress={handlePlayAll}
             activeOpacity={0.8}
           >
-            <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
+            <List size={20} color="#FFFFFF" strokeWidth={2} />
+            <Text style={styles.playAllText}>Play All</Text>
           </TouchableOpacity>
-
-          {/* Right Side Actions - TikTok Style */}
-          <View style={[styles.rightActions, { bottom: insets.bottom + 120 }]}>
+        )}
+      </View>
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.categoryContainer}>
+          <Text style={styles.category}>{quote.category}</Text>
+        </View>
+        
+        <Text style={styles.quote}>{quote.text}</Text>
+        
+        <Text style={styles.attribution}>{quote.attribution}</Text>
+        
+        <Text style={styles.reference}>{quote.reference}</Text>
+        
+        <View style={styles.playerContainer}>
+          <View style={styles.playerControls}>
             <TouchableOpacity 
-              style={[styles.actionButton, isFavorited && styles.favoriteActive]} 
+              style={[styles.favoriteButton, isFavorited && styles.favoriteActive]} 
               onPress={handleFavorite}
-              activeOpacity={0.8}
             >
               <Heart 
-                size={28} 
+                size={24} 
                 color="#FFFFFF" 
                 fill={isFavorited ? '#E25822' : 'transparent'} 
-                strokeWidth={2}
               />
-              <Text style={styles.actionText}>
-                {isFavorited ? 'Liked' : 'Like'}
-              </Text>
             </TouchableOpacity>
             
+            {showPlaylistControls && (
+              <TouchableOpacity 
+                style={styles.controlButton} 
+                onPress={handlePrevious}
+              >
+                <SkipBack size={28} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
+            
             <TouchableOpacity 
-              style={styles.actionButton} 
+              style={styles.playButton} 
+              onPress={handlePlayPause}
+            >
+              {isCurrentlyPlaying ? (
+                <Pause size={32} color="#FFFFFF" />
+              ) : (
+                <Play size={32} color="#FFFFFF" />
+              )}
+            </TouchableOpacity>
+            
+            {showPlaylistControls && (
+              <TouchableOpacity 
+                style={styles.controlButton} 
+                onPress={handleNext}
+              >
+                <SkipForward size={28} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
+            
+            <TouchableOpacity 
+              style={styles.shareButton} 
               onPress={handleShare}
-              activeOpacity={0.8}
             >
-              <Share2 size={28} color="#FFFFFF" strokeWidth={2} />
-              <Text style={styles.actionText}>Share</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.actionButton} 
-              onPress={() => setShowDetails(!showDetails)}
-              activeOpacity={0.8}
-            >
-              <MoreHorizontal size={28} color="#FFFFFF" strokeWidth={2} />
-              <Text style={styles.actionText}>More</Text>
+              <Share2 size={24} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
-
-          {/* Bottom Content */}
-          <View style={[styles.bottomContent, { paddingBottom: insets.bottom + 20 }]}>
-            <View style={styles.categoryContainer}>
-              <Text style={styles.category}>{quote.category}</Text>
+          
+          {showPlaylistControls && (
+            <View style={styles.playlistInfo}>
+              <Text style={styles.playlistText}>
+                {currentIndex + 1} of {currentPlaylist.length}
+              </Text>
             </View>
-            
-            <Text style={styles.quote}>{quote.text}</Text>
-            
-            <Text style={styles.attribution}>{quote.attribution}</Text>
-            
-            <Text style={styles.reference}>{quote.reference}</Text>
-            
-            {isCurrentlyPlaying && (
-              <View style={styles.waveformContainer}>
-                <AudioWaveform />
-              </View>
-            )}
-
-            {/* Playlist indicator */}
-            {currentPlaylist.length > 1 && (
-              <View style={styles.playlistIndicator}>
-                <Text style={styles.playlistText}>
-                  {currentIndex + 1} / {currentPlaylist.length}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Details Overlay */}
-          {showDetails && (
-            <TouchableOpacity 
-              style={styles.detailsOverlay}
-              onPress={() => setShowDetails(false)}
-              activeOpacity={1}
-            >
-              <View style={styles.detailsContent}>
-                <Text style={styles.detailsTitle}>About this teaching</Text>
-                <Text style={styles.detailsText}>{quote.explanation}</Text>
-              </View>
-            </TouchableOpacity>
+          )}
+          
+          {isCurrentlyPlaying && (
+            <View style={styles.waveformContainer}>
+              <AudioWaveform />
+            </View>
           )}
         </View>
-      </PanGestureHandler>
+        
+        <View style={styles.explanationContainer}>
+          <Text style={styles.explanationTitle}>Explanation</Text>
+          <Text style={styles.explanation}>{quote.explanation}</Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -244,12 +230,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  gestureContainer: {
-    flex: 1,
-  },
-  playPauseArea: {
-    flex: 1,
   },
   backgroundImage: {
     width,
@@ -263,45 +243,56 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
   },
-  backButton: {
+  customHeader: {
     position: 'absolute',
-    left: 16,
+    top: 50,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
     backgroundColor: 'rgba(0,0,0,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  rightActions: {
-    position: 'absolute',
-    right: 16,
+  playAllButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    zIndex: 1000,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  actionButton: {
-    alignItems: 'center',
-    marginBottom: 24,
-    padding: 8,
-  },
-  favoriteActive: {
-    transform: [{ scale: 1.1 }],
-  },
-  actionText: {
+  playAllText: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.xs,
+    fontSize: typography.sizes.sm,
     fontWeight: '600',
-    marginTop: 4,
-    textAlign: 'center',
+    marginLeft: 6,
   },
-  bottomContent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 80, // Leave space for right actions
+  scrollView: {
+    flex: 1,
+  },
+  content: {
     padding: 20,
-    zIndex: 1000,
+    paddingTop: 120,
+    paddingBottom: 40,
   },
   categoryContainer: {
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -309,7 +300,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     alignSelf: 'flex-start',
-    marginBottom: 16,
+    marginBottom: 24,
   },
   category: {
     color: '#FFFFFF',
@@ -318,10 +309,10 @@ const styles = StyleSheet.create({
   },
   quote: {
     color: '#FFFFFF',
-    fontSize: typography.sizes.xl,
+    fontSize: typography.sizes.xxl,
     fontFamily: typography.quoteFont,
-    marginBottom: 12,
-    lineHeight: typography.sizes.xl * 1.3,
+    marginBottom: 16,
+    lineHeight: typography.sizes.xxl * 1.4,
   },
   attribution: {
     color: '#FFFFFF',
@@ -333,48 +324,88 @@ const styles = StyleSheet.create({
   },
   reference: {
     color: 'rgba(255,255,255,0.8)',
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.md,
     fontStyle: 'italic',
+    marginBottom: 40,
+  },
+  playerContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  playerControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
     marginBottom: 16,
   },
-  waveformContainer: {
-    alignSelf: 'flex-start',
-    marginBottom: 12,
+  playButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
   },
-  playlistIndicator: {
-    alignSelf: 'flex-start',
+  controlButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 10,
+  },
+  favoriteButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: 0,
+  },
+  favoriteActive: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  shareButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 0,
+  },
+  playlistInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginBottom: 16,
   },
   playlistText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: typography.sizes.xs,
-    fontWeight: '500',
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: typography.sizes.sm,
   },
-  detailsOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2000,
+  waveformContainer: {
+    marginTop: 20,
   },
-  detailsContent: {
+  explanationContainer: {
     backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 16,
-    padding: 24,
-    margin: 20,
-    maxHeight: '70%',
+    padding: 20,
   },
-  detailsTitle: {
+  explanationTitle: {
     color: '#FFFFFF',
     fontSize: typography.sizes.lg,
     fontWeight: '600',
-    marginBottom: 16,
-    textAlign: 'center',
+    marginBottom: 12,
   },
-  detailsText: {
+  explanation: {
     color: '#FFFFFF',
     fontSize: typography.sizes.md,
     lineHeight: typography.sizes.md * 1.6,
